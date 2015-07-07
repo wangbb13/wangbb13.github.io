@@ -86,7 +86,7 @@ ul {
 	width: 70%;
 }
 
-.main .article {
+.article {
 	background-color: #fafafa;
 	margin: 0 0 3em;
 }
@@ -105,14 +105,14 @@ ul {
 	border-bottom: 2px solid #ccc;
 }
 
-.main .article_content {
+.article_content {
 	width: 100%;
 	margin: 0;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: normal;
-	word-break: break-all;
 	word-wrap:break-word;
+	font: normal 120% "Times New Roman",Georgia,Serif;
 }
 
 .main .footer {
@@ -202,10 +202,43 @@ ul {
 
 #footer {
 	margin: 2em 0 0;
-	width: 90%;
+	width: 100%;
+	overflow: hidden;
+	background-color: #aad7ff;
 }
 
 #footer .footer_content {
 	float: right;
 	width: 50%;
+	font-style: #ccc;
 }
+
+#footer .to_top {
+	width: 10%;
+	float: right;
+  	position: fixed;
+  	cursor: pointer;
+}
+
+/*about me .css*/
+#content .about_me {
+	width: 100%;
+	margin: 1em 0 0;
+	overflow: hidden;
+	background-color: #fafafa;
+}
+
+.about_me .about_img {
+	width: 50%;
+	margin: 1em 1em 0;
+	overflow: hidden;
+	float: left;
+}
+
+.about_me .about_content {
+	width: 40%;
+	margin: 1em 0 0;
+	overflow: hidden;
+	float: right;
+}
+
