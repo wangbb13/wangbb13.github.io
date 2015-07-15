@@ -38,7 +38,7 @@ function loadData(){
 				if (xmlHttp.readyState==4 && xmlHttp.status==200){
 					jsonObj = eval("(" + xmlHttp.responseText + ")");
 					while(imgLoad <= 10){
-						addOne();
+						addOne();					
 					}
 				}
 			}
@@ -92,14 +92,19 @@ function addOne(){
 	dist       = parseInt(dist);
 	var imgSty = Math.ceil(Math.random() * 3);
 
-	document.getElementById(imgLoad).innerHTML
-						= ('<a><img src=' + picSrc + ' class="img-ul' + imgSty
-						+ '" onclick="showShade(this.id)" id="' 
-						+ (picId + 1) + '"></a>'
-						+ '<div class="info">'
-						+ '<p>' + '</br>' + '位置信息：'
-						+ picPos + '</br>距离您：'
-						+ dist + '千米</p></div>');
+	var img = new Image();
+	img.src = picSrc;
+	img.onload = function(){
+		document.getElementById(imgLoad).innerHTML
+							= ('<a><img src=' + picSrc + ' class="img-ul' + imgSty
+							+ '" onclick="showShade(this.id)" id="' 
+							+ (picId + 1) + '"></a>'
+							+ '<div class="info">'
+							+ '<p>' + '</br>' + '位置信息：'
+							+ picPos + '</br>距离您：'
+							+ dist + '千米</p></div>');
+
+	}
 }
 
 
@@ -162,7 +167,7 @@ window.onscroll = function (){
 	if (scrollT >= scrollH - clientH - 500){
 		for (var i = 0; i < 4; i++){
 			addLoad();
-			addOne();			
+			addOne();		
 		}
 	}
 }
