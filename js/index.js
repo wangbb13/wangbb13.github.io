@@ -37,9 +37,7 @@ function loadData(){
 			if (xmlHttp.readyState == 4){
 				if (xmlHttp.readyState==4 && xmlHttp.status==200){
 					jsonObj = eval("(" + xmlHttp.responseText + ")");
-					while(imgLoad <= 10){
-						addOne();
-					}
+					addOne();
 				}
 			}
 		});
@@ -162,7 +160,7 @@ window.onscroll = function (){
 	if (scrollT >= scrollH - clientH - 500){
 		for (var i = 0; i < 4; i++){
 			addLoad();
-			addOne();			
+			loadData();		
 		}
 	}
 }
@@ -249,7 +247,9 @@ $(function(){
 	for (var i = 0; i < 10; i++){
 		addLoad();
 	}
-	loadData();
+	for (var i = 0; i < 10; i++){
+		loadData();
+	}
 
 	//获取当前地理位置
 	if (navigator.geolocation) {
