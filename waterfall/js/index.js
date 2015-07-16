@@ -37,8 +37,8 @@ function loadData(){
 			if (xmlHttp.readyState == 4){
 				if (xmlHttp.readyState==4 && xmlHttp.status==200){
 					jsonObj = eval("(" + xmlHttp.responseText + ")");
-					while(imgLoad <= 10){
-						addOne();					
+					while(imgLoad < 10){
+						addOne();
 					}
 				}
 			}
@@ -72,8 +72,6 @@ function addError(){
 	if (imgLoad > imgLimit){
 		return;
 	}
-
-	imgLoad++;
 	document.getElementById(imgLoad).innerHTML = '<a><img src=' + "/img/error.jpg" + '></a>'
 						+ '<div class="info"></div>';
 }
@@ -83,7 +81,6 @@ function addOne(){
 	if (imgLoad > imgLimit){
 		return;
 	}
-
 	var picId  = (imgLoad++) % imgNumb;
 	var picSrc = jsonObj[picId].picSrc;
 	var picPos = '</br>经度：' + jsonObj[picId].picPos[0] 
@@ -91,20 +88,19 @@ function addOne(){
 	var dist   = getDistance(jsonObj[picId].picPos[0], jsonObj[picId].picPos[1], curLongi, curLati);
 	dist       = parseInt(dist);
 	var imgSty = Math.ceil(Math.random() * 3);
+	var imgLi = document.getElementById(imgLoad);
 
-	var img = new Image();
-	img.src = picSrc;
-	img.onload = function(){
-		document.getElementById(imgLoad).innerHTML
-							= ('<a><img src=' + picSrc + ' class="img-ul' + imgSty
-							+ '" onclick="showShade(this.id)" id="' 
-							+ (picId + 1) + '"></a>'
-							+ '<div class="info">'
-							+ '<p>' + '</br>' + '位置信息：'
-							+ picPos + '</br>距离您：'
-							+ dist + '千米</p></div>');
-
-	}
+	var imag = new Image();
+	imag.onload = function(){
+		imgLi.innerHTML = ('<a><img src=' + picSrc + ' class="img-ul' + imgSty
+				+ '" onclick="showShade(this.id)" id="' 
+				+ (picId + 1) + '"></a>'
+				+ '<div class="info">'
+				+ '<p>' + '</br>' + '位置信息：'
+				+ picPos + '</br>距离您：'
+				+ dist + '千米</p></div>');
+	};
+	imag.src = picSrc;
 }
 
 
@@ -167,7 +163,7 @@ window.onscroll = function (){
 	if (scrollT >= scrollH - clientH - 500){
 		for (var i = 0; i < 4; i++){
 			addLoad();
-			addOne();		
+			addOne();			
 		}
 	}
 }
