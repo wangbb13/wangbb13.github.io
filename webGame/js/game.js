@@ -287,6 +287,9 @@ function JudgeIfEnd(){
 	if (BallChain[0].index < Map[level].length - 1){
 		return false;
 	}
+	if (BallChain[0].index == Map[level].length - 1 && BallChain[0].canMove == true){
+		return true;
+	}
 	for(var i = 0; i < BallChain.length; i++){
 		if (BallChain[i].canMove == false){
 			return false;
@@ -495,7 +498,7 @@ function DrawBullet(){
 var all = 0;
 var img = [];
 function Initial(){
-	for (var i = 0; i < 9; i++){
+	for (var i = 0; i < 10; i++){
 		img[i] = new Image();
 		if (i == 0){
 			img[i].src = "images/bullet.png";
@@ -503,13 +506,16 @@ function Initial(){
 		else if (i > 0 && i < 6){
 			img[i].src = "images/ball" + i + ".png";
 		}
-		else {
+		else if (i < 9) {
 			img[i].src = "images/clear" + (i - 5) + ".png";
+		}
+		else {
+			img[i].src = "images/cave.png";
 		}
 		img[i].onload = function(){
 			all++;
-			if (all == 9){
-				for (var i = 0; i < 9; i++){
+			if (all == 10){
+				for (var i = 0; i < 10; i++){
 					Images[i] = img[i];
 				}
 			}
@@ -534,6 +540,11 @@ function Play(){
 		BallChain.push(ball);
 	}
 	Battery = new ClassOfBattery(Canvas.width / 2, Canvas.height / 2, Images[0]);
+	
+//	//画洞穴
+//	var loc = Map[level][Map[level].length - 1];
+//	Cxt.drawImage(Images[9], loc[0] - Images[9].width / 2, loc[1] - Images[9].height / 2);
+
 	//画炮台
 	var centerx = Canvas.width / 2;
 	var centery = Canvas.height / 2;
