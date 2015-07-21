@@ -1,0 +1,82 @@
+<!DOCTYPE <html>
+<head>
+	<title>web前端游戏</title>
+	<meta charset="UTF-8">
+	<script src="js/jquery-1.11.3.min.js"></script>
+	<script src="js/map.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+	<!-- audio -->
+	<audio loop src="music/backgroundMusic.mp3" id="backmusic" controls="controls"></audio>
+	<audio preload="auto" src="music/display.mp3" id="display"></audio>
+	<audio preload="auto" src="music/fail.mp3" id="fail"></audio>
+	<audio preload="auto" src="music/success.mp3" id="vectory"></audio>
+	<audio preload="auto" src="music/hit.mp3" id="hit"></audio>
+	<audio preload="auto" src="music/shoot.mp3" id="shoot"></audio>
+	
+	<div class="webgame">
+		<!-- kai shi & play -->
+		<div class="start-run-interface">
+			<div class="content">
+				<div id="start-interface">
+					<div class="title">
+						<div id="title"><img src="images/title.png"></div>
+					</div>
+					<div class="startBtn">
+						<a>开始游戏</a>
+					</div>
+					<div class="helpBtn">
+						<a>游戏说明</a>
+					</div>
+					<div class="footer">
+						<p>作者：王彬彬 贺超</p>
+					</div>
+				</div>
+				<div id="run-interface">
+					<div id="subcanvas">
+						<canvas id="gameCanvas" width="600" height="600"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- zhe zhao -->
+		<div class="shade" id="shade"></div>
+
+		<!-- shuo ming tan ceng -->
+		<div class="itdlayer" id="itdlayer">
+			<h1>游戏说明</h1>
+			<p>游戏的主角是一只萌萌哒小飞机，小飞机在守护着我们美丽的太阳系．环绕着小飞机的是外星人进攻太阳系的轨道，上面有着各种姿态的外星侵略者，侵略者会沿着轨道进攻，小飞机必需遏止侵略者侵略我们的家园．小飞机作为守护神会召唤各种能量球，能量球造型美丽，并且有着神秘的色彩，具有着特殊的魔法能量，包括金，木，水，火，土，的五行能量（当元素结合的时候将释放出巨大的宇宙能量），能量球要靠发射的能力球与轨道上的侵略者相结合，类型相同即可以利用反物质原理打败侵略者，小伙伴们，快快拿起你们手中的武器，作为太阳系的守护神守护我们的家园．</p>
+			<p>玩法介绍：中间有一个小飞机，可以发射各种各样的小球，轨道上有５种颜色的小球，当发射小球和轨道上小球连成３个或3个以上相同颜色的球即可以消去．鼠标点击发射小球</p>
+			<h4 id="returnstart">返回</h4>
+		</div>
+		
+		<!-- shi bai tan ceng -->
+		<div class="faillayer" id="faillayer">
+			<h1>失败</h1>
+			<h2 id="tryagain">再玩一次</h2>
+			<h2 id="returnmain">回主菜单</h2>
+		</div>
+
+		<!-- cheng gong jie mian -->
+		<div class="success" id="success">
+			<h1>闯关成功</h1>
+			<h2 id="nextlevel">下一关</h2>
+			<h2 id="again">再玩一次</h2>
+			<h2 id="backmain">回主菜单</h2>
+		</div>
+
+		<!-- xuan ze guan qia tan ceng -->
+		<div class="selectlevel" id="selectlevel">
+			<h1>选择关卡</h1>
+			<h3 id="level1">LEVEL1</h3>
+			<h3 id="level2">LEVEL2</h3>
+			<h3 id="level3">LEVEL3</h3>
+			<h3 id="level4">LEVEL4</h3>
+		</div>
+	</div>
+
+	<script src="js/game.js"></script>
+</body>
+</html>
