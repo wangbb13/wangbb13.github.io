@@ -498,33 +498,39 @@ function DrawBullet(){
 var all = 0;
 var img = [];
 function Initial(){
-	for (var i = 0; i < 10; i++){
+	for (var i = 0; i < 12; i++){
 		img[i] = new Image();
 		if (i == 0){
-			img[i].src = "images/bullet.png";
+			img[i].src = "images/background.png";
 		}
 		else if (i > 0 && i < 6){
 			img[i].src = "images/ball" + i + ".png";
 		}
-		else if (i < 9) {
-			img[i].src = "images/clear" + (i - 5) + ".png";
+		else if (i > 5 && i < 10){
+			img[i].src = "images/map" + (i - 5) + ".png";
+		}
+		else if (i == 10){
+			img[i].src = "images/bullet.png";
 		}
 		else {
-			img[i].src = "images/cave.png";
+			img[i].src = "images/title.png";
 		}
 		img[i].onload = function(){
 			all++;
-			if (all == 10){
-				for (var i = 0; i < 10; i++){
+			if (all == 12){
+				for (var i = 0; i < 12; i++){
 					Images[i] = img[i];
 				}
+				$('body').css("background-image", "url(images/background.png)");
+				$('#loading').hide();
+				$('#title').append("<img src=\"images/title.png\">");
+				$('#start-interface').show();
 			}
-		}
+		};
 	}
+	Sound.background.play();
 }
 Initial();
-
-Sound.background.play();
 
 /*
 *游戏运行接口
@@ -533,17 +539,13 @@ function Play(){
 	BFinish = false;
 	BSuccess = false;
 	Diameter = Images[1].width;
-	Caliber  = Images[0].width;
+	Caliber  = Images[10].width;
 	for (var i = 0; i < Levels[level].NumOfBalls; i++){
 		var style = Math.ceil(Math.random() * 5);
 		var ball = new ClassOfBall(Canvas.width + Diameter, Canvas.height + Diameter, Images[style], style);
 		BallChain.push(ball);
 	}
-	Battery = new ClassOfBattery(Canvas.width / 2, Canvas.height / 2, Images[0]);
-	
-//	//画洞穴
-//	var loc = Map[level][Map[level].length - 1];
-//	Cxt.drawImage(Images[9], loc[0] - Images[9].width / 2, loc[1] - Images[9].height / 2);
+	Battery = new ClassOfBattery(Canvas.width / 2, Canvas.height / 2, Images[10]);
 
 	//画炮台
 	var centerx = Canvas.width / 2;
@@ -633,7 +635,6 @@ $('#gameCanvas').mousemove(function(e){
 		angle = Math.PI - angle;
 	}
 
-
 	Cxt.clearRect(centerx + Diameter / 2, centery + Diameter / 2, Caliber, Caliber);
 	Battery.revole(angle);
 	Cxt.drawImage(Battery.canvas, centerx - Caliber / 2, centery - Caliber / 2);
@@ -655,7 +656,6 @@ $('.helpBtn').click(function(){
 $('#returnstart').click(function(){
 	$('#shade').hide();
 	$('#itdlayer').hide();
-	$('#run-interface').hide();
 	$('#start-interface').show();
 });
 
@@ -672,6 +672,8 @@ $('#tryagain').click(function(){
 	Sound.fail.pause();
 	BallChain.length = 0;
 	Bullet.length    = 0;
+	clearInterval(interval1);
+	clearInterval(interval2);
 	$('#faillayer').hide();
 	Play();
 });
@@ -679,12 +681,28 @@ $('#tryagain').click(function(){
 //下一关
 $('#nextlevel').click(function(){
 	Sound.vectory.pause();
-	(++level) % 4;
+	level = (level + 1) % 4;
 	clearInterval(interval1);
 	clearInterval(interval2);
 	BallChain.length = 0;
 	Bullet.length    = 0;
 	$('#success').hide();
+	switch (level){
+	case 0:
+		$('#subcanvas').css("background-image", "url(images/map1.png)");
+		break;
+	case 1:
+		$('#subcanvas').css("background-image", "url(images/map2.png)");
+		break;
+	case 2:
+		$('#subcanvas').css("background-image", "url(images/map3.png)");
+		break;
+	case 3:
+		$('#subcanvas').css("background-image", "url(images/map4.png)");
+		break;
+	default:
+		break;
+	}
 	$('#run-interface').show();
 	Play();
 })
@@ -711,7 +729,7 @@ $('#backmain').click(function(){
 //第一关
 $('#level1').click(function(){
 	level = 0;
-	$('#subcanvas').css("background-image", "url(./images/map1.png)");
+	$('#subcanvas').css("background-image", "url(images/map1.png)");
 	$('#start-interface').hide();
 	$('#run-interface').show();
 	$('#selectlevel').hide();
@@ -721,7 +739,7 @@ $('#level1').click(function(){
 //第二关
 $('#level2').click(function(){
 	level = 1;
-	$('#subcanvas').css("background-image", "url(./images/map2.png)");
+	$('#subcanvas').css("background-image", "url(images/map2.png)");
 	$('#start-interface').hide();
 	$('#run-interface').show();
 	$('#selectlevel').hide();
@@ -731,7 +749,7 @@ $('#level2').click(function(){
 //第三关
 $('#level3').click(function(){
 	level = 2;
-	$('#subcanvas').css("background-image", "url(./images/map3.png)");
+	$('#subcanvas').css("background-image", "url(images/map3.png)");
 	$('#start-interface').hide();
 	$('#run-interface').show();
 	$('#selectlevel').hide();
@@ -741,7 +759,7 @@ $('#level3').click(function(){
 //第四关
 $('#level4').click(function(){
 	level = 3;
-	$('#subcanvas').css("background-image", "url(./images/map4.png)");
+	$('#subcanvas').css("background-image", "url(images/map4.png)");
 	$('#start-interface').hide();
 	$('#run-interface').show();
 	$('#selectlevel').hide();
