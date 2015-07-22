@@ -1,7 +1,6 @@
 body {
 	background: no-repeat fixed center;
 	background-size: 100% 100%;
-	background-image: url("images/loading.gif");
 }
 
 body .webgame {
