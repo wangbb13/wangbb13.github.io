@@ -195,3 +195,9 @@ body .webgame {
 	display: block;
 }
 
+.loading img {
+	position: absolute;
+	left: 45%;
+	top: 35%;
+}
+
