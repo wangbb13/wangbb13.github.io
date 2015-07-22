@@ -33,6 +33,7 @@ var interval1;						//画球链的周期函数
 var interval2;						//画炮弹的周期函数
 var BFinish  = false;				//是否结束
 var BSuccess = false;				//是否成功
+var BallSpeed = [150, 120, 100, 60] //小球运动速度
 
 //音乐
 var Sound = {
@@ -565,7 +566,7 @@ function Play(){
 	Cxt.drawImage(Bullet[0].image, centerx - Diameter / 2, centery - Diameter / 2);
 
 	//画轨道及小球
-	interval1 = setInterval("DrawBallChain()", 100);
+	interval1 = setInterval("DrawBallChain()", BallSpeed[level]);
 	interval2 = setInterval("DrawBullet()", 10);
 }
 
