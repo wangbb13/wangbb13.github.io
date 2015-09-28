@@ -137,14 +137,20 @@ function WindowToCanvas(canvas, x, y){
 function Insert(ball, id){
 	ball.index = BallChain[id].index;
 	ball.move(Map[level][ball.index]);
-	for (var i = id; i >= 0; i--){
-		try{
+	for (var i = id; i > 0; i--){
+		if (BallChain[i - 1].index - BallChain[i].index == Step[level]){
 			BallChain[i].index += Step[level];
 			BallChain[i].move(Map[level][BallChain[i].index]);
 		}
+	}
+	if ((BallChain.length > 1 && BallChain[1].index == BallChain[0].index) || BallChain.length == 1){
+		try{
+			BallChain[0].index += Step[level];
+			BallChain[0].move(Map[level][BallChain[0].index]);
+		}
 		catch(e){
-			BallChain[i].index = Map[level].length - 1;
-			BallChain[i].move(Map[level][BallChain[i].index]);
+			BallChain[0].index = Map[level].length - 1;
+			BallChain[0].move(Map[level][BallChain[0].index]);
 		}
 	}
 	BallChain.splice(id + 1, 0, ball);
