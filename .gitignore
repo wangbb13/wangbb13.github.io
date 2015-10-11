@@ -1,0 +1,7 @@
+gameOfLive/node_modules
+gameOfLive/dist
+gameOfLive/.tmp
+gameOfLive/bower_components
+gameOfLive/.idea
+gameOfLive/coverage
+gameOfLive/.coverage
