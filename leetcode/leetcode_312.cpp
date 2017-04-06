@@ -93,6 +93,13 @@ int maxVal(int* array, int n, int remain) {
   return rtn;
 }
 
+int maxCoins(vector<int>& nums) {
+  if (nums.size() == 0) {
+    return 0;
+  }
+  
+}
+
 int main(int argc, char const *argv[])
 {
   int n, array[500];
