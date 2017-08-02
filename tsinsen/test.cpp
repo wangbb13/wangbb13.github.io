@@ -23,9 +23,16 @@ int main() {
   //   cout << a.digits[i] << " ";
   // }
   // cout << endl;
-  A t[10];
-  for (int i = 0; i < 10; i++) {
-    cout << t[i].x << " " << t[i].y << endl;
+  // A t[10];
+  // for (int i = 0; i < 10; i++) {
+  //   cout << t[i].x << " " << t[i].y << endl;
+  // }
+  char ch[10];
+  for (int i = 0; i < 4; i++) {
+    cin >> ch[i];
+  }
+  for (int i = 0; i < 4; i++) {
+    cout << ch[i];
   }
   return 0;
 }
