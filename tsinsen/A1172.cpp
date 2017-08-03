@@ -88,7 +88,7 @@ int main() {
     for (i = 0; i < n; i++) {
       cin >> x;
     }
-    cout << 1 << endl;
+    cout << 0 << endl;
     return 0;
   }
   decom(m1);
@@ -107,7 +107,7 @@ int main() {
     r = cacu();
     if (r < j) {
       j = r;
-      ans = i+1;
+      ans = j;
     }
   }
   cout << ans << endl;
