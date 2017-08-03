@@ -1,8 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 using namespace std;
-
-vector<int> dp(40003, 0);
 
 int main() {
   int T, N;
@@ -11,7 +10,9 @@ int main() {
   cin >> T;
   while (T--) {
     cin >> N >> P;
-    long long int base = 1 << N;
+    double all = pow(2., N);
+    double thr = all * P;
+    vector<long long int> dp(40003, 0);
     dp[0] = 1;
     for (i = 0; i < N; i++) {
       cin >> k;
@@ -19,10 +20,10 @@ int main() {
         dp[j] += dp[j-k];
       }
     }
-    j = 0;
+    double sum = 0.;
     for (i = 0; i <= 40000; i++) {
-      j += dp[i];
-      if (((double)j / (double)base) - P > 1e-10) {
+      sum += dp[i];
+      if (sum >= thr) {
         cout << i << endl;
         break;
       }
