@@ -11,12 +11,17 @@ if __name__ == '__main__':
   cmd = sys.argv[2]
   name = sys.argv[1]
   if cmd == 'c':
-    os.system('cp template.cpp %s.cpp' % (name))
+    string = ''
+    with open('template.cpp', 'r') as f:
+      string = f.read()
+    with open('%s.cpp'%(name), 'w') as f:
+      f.write(string.replace('[]', name))
+    # os.system('cp template.cpp %s.cpp' % (name))
     os.system('touch %s.in %s.out' % (name, name))
     os.system('subl -a %s.cpp %s.in %s.out' % (name, name, name))
     print('create successfully.')
   elif cmd == 'd':
-    os.system('rm %s %s.in %s.out' % (name, name, name))
+    os.system('rm %s.in %s.out %s' % (name, name, name))
     print('delete successfully.')
   else:
     print('unkonwn command.')
