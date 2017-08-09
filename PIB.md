@@ -390,11 +390,103 @@ int main() {
 
 #### 10.3  成员变量
 
+> 静态成员变量在一个类的所有实例间共享数据。
 
+> 如果把静态成员数据设为私有，可以通过公有的静态成员函数来访问。
+
+**初始化列表的初始化变量顺序是根据成员变量的声明顺序来执行的，如下：**
+
+```c++
+class base {
+  private:
+  int m_i;
+  int m_j;
+  public:
+  base(int i) : m_j(i), m_i(m_j) {}
+  int get_i() { return m_i; }
+  int get_j() { return m_j; }
+};
+
+int main() {
+  base obj(98);
+  cout << obj.get_i() << " " << obj.get_j() << endl;
+  return 0;
+}
+// 结果输出 ?  98
+// 若要输出 98 98，修改声明顺序即可
+class base {
+  private:
+  int m_j;	// 
+  int m_i;	// 
+  public:
+  base(int i) : m_i(m_j), m_j(i) {}	// 
+  int get_i() { return m_i; }
+  int get_j() { return m_j; }
+};
+```
+
+**常量必须在构造函数的初始化列表里初始化或者设置成static，如下：**
+
+```c++
+class A {
+  const int size = 0;
+};
+
+// 改正如下
+class A {
+  A() { const int size = 0; }
+};
+// 或者
+class A {
+  static const int size = 0;
+};
+```
 
 #### 10.4  构造函数和析构函数
 
+> 在生成派生类对象时，首先调用基类的构造函数，再调用子类的构造函数；再销毁子类对象时，先调用父类的析构函数，再调用子类的析构函数。
 
+**如果将父类的析构函数改为虚函数，将避免出现内存泄漏的情况。如下：**
+
+```c++
+CBase *pB;
+CChild c;
+pB = &c;
+delete pB;
+// 如果父类析构函数不是虚函数，那么撤销pB时，将不会调用子类的析构函数，从而不会释放子类所占用的空间，造成内存泄漏。
+```
+
+**构造函数为什么不能为虚函数？**
+
+**Ans：**虚函数的作用在于通过父类的指针或者引用来调用子类相应的成员函数。构造函数是在创建对象时自动调用的，不可能通过父类的指针或者引用去调用，因此构造函数不能是虚函数。
+
+>  虚函数是有代价的，每个虚函数的对象都必须维护一个虚函数表，使用时会产生额外的开销。
+
+> 析构函数可以是内联函数。
+
+**注意以下问题：**
+
+```c++
+class B {
+  private:
+  int data;
+  public:
+  B() { cout << "default constructor" << endl; }
+  ~B() { cout << "destructed" << endl; }
+  B(int i) : data(i) { cout << "constructed by " << data << endl; }	// 带参数的构造函数，冒号后面是成员变量初始化列表。
+};
+B play(B b) { return b; }
+int main() {
+  B t = play(5);  // (1)
+  return 0;
+}
+
+// (1)处合法，单个参数的构造函数如果不添加explicit关键字，会定义一个隐含的类型转换。
+// 程序输出：
+// constructed by 5	, 隐含的类型转换
+// destructed       , play函数返回时，参数的析构函数被调用
+// destructed       , temp的析构函数调用
+```
 
 #### 10.5  复制构造函数和赋值函数
 
