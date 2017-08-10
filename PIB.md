@@ -490,13 +490,89 @@ int main() {
 
 #### 10.5  复制构造函数和赋值函数
 
+**编写String类的构造、析构和赋值函数：**
 
+```c++
+class String {
+  public:
+  String (const char *str = null);
+  String (const String &other);
+  ~String (void);
+  String & operate = (const String &);
+  private:
+  char *m_data;
+}
+
+String::~String(void) {
+  delete [] m_data;
+}
+
+String::String(const char *str) {
+  if (str == null) {
+    m_data = new char [1];
+    m_data[0] = '\0';
+  } else {
+    int length = strlen(str);
+    m_data = new char[length + 1];
+    strcpy(m_data, str);
+  }
+}
+
+String::String(const String& other) {
+  int length = strlen(other.m_data);
+  m_data = new char[length + 1];
+  strcpy(m_data, other.m_data);
+}
+
+String & String::operate = (const String &other) {
+  if (this == other) {
+    return *this;
+  }
+  delete [] m_data;
+  int len = strlen(other.m_data);
+  m_data = new char[len + 1];
+  strcpy(m_data, other.m_data);
+  return *this;
+}
+```
 
 #### 10.6  多态
 
+> 多台可以简单地概括为“一个接口，多种方法”，在程序运行的过程中才决定调用的函数。
+>
+> 允许将子类类型的指针赋值给父类类型的指针。
 
+> 虚函数即允许被子类重新定义的成员函数。子类重新定义父类虚函数的做法，称为“覆盖”（override）。
+
+> 重载（overload）与多态无关，在编译时就已经确定了，是静态的。体现多态的是“覆盖”。
+
+> 封装：隐藏实现细节，模块化代码；-> 代码重用
+>
+> 继承：扩展已有的模块；-> 代码重用
+>
+> 多态：接口重用。
+>
+> **多态是面向对象最重要的特性。**
 
 #### 10.7  友元
+
+> 在对某些成员函数多次调用时，由于参数传递、类型检查和安全性检查等需要时间开销，影响运行效率，因此提出友元的方案。
+>
+> 友元，定义在类外部的普通函数，可以访问私有变量，破坏了封装性，需要在类内说明。用于提高程序运行效率。
+
+```c++
+class Point {
+  private:
+  float x, y;
+  public:
+  Point(float a = 0., float b = 0.) : x(a, b) {};
+  friend float distance(Point& left, Point& right);
+};
+
+friend float distance(Point& left, Point& right) {
+  return 0.; // ..
+}
+```
 
 
 
