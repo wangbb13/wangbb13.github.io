@@ -540,7 +540,7 @@ String & String::operate = (const String &other) {
 
 > 多台可以简单地概括为“一个接口，多种方法”，在程序运行的过程中才决定调用的函数。
 >
-> 允许将子类类型的指针赋值给父类类型的指针。
+> 允许将子类类型的指针赋值给父类类型的指针。pFather = pChild;
 
 > 虚函数即允许被子类重新定义的成员函数。子类重新定义父类虚函数的做法，称为“覆盖”（override）。
 
@@ -577,6 +577,137 @@ friend float distance(Point& left, Point& right) {
 #### 10.8  异常
 
 > 不应该在析构函数中抛出异常。
+
+### 第11章  继承与接口
+
+#### 11.1  私有继承
+
+```c++
+class A {
+  public:
+  void virtual f() { cout << "A" << endl; }
+};
+
+class B : public A {
+  public:
+  void virtual f() { cout << "B" << endl; }
+}
+
+int main() {
+  A* pa = new A();
+  pa->f();
+  B* pb = (B*)pa;
+  pb->f();
+  
+  delete pa, pb;
+  pa = new B();
+  pa->f();
+  pb = (B*)pa;
+  pb->f();
+}
+// A A B B
+```
+
+> 私有继承使对象不能被派生类的子类访问。
+
+> 一个私有的或保护的派生类不是子类，因为他不能做基类能做的所有的事。
+
+> **保护继承和私有继承在外部不能访问基类的成员。**
+
+**三种继承方式：**
+
+- `public`：对派生类来说，`public`和`protected`成员可见，保持原有的状态，不能访问`private`成员；对派生类对象来说，`public`成员可见，其他不可见。
+- `private`：对派生类来说，`public`和`protected`成员可见，基类的`public`成员和`protected`成员作为派生类的`private`成员；对派生类对象来说，所有成员都不可见。
+- `protected`：与`private`继承相同，只是基类的`public`成员和`protected`成员作为派生类的`protected`成员，能被其子类访问，但不能被其子类对象访问。
+- 保护继承和私有继承不常见，只是在技术讨论时会出现。
+- 如果不指定继承方式，默认是`private`。
+
+#### 11.2  虚函数继承和虚继承
+
+> 每个对象里有虚表指针，指向虚表，虚表里存放了虚函数的地址（顺序存放）。
+
+```c++
+class A {
+  char a[3];
+  public:
+  virtual void aa() {};
+};
+class B : public virtual A {
+  char b[3];
+  public:
+  virtual void bb() {};
+};
+class C : public virtual B {
+  char c[3];
+  public:
+  virtual void cc() {};
+};
+// sizeof(A) = 8  : 由于有虚函数，所以有虚指针，外加3个字节对齐后的结果
+// sizeof(B) = 16 : 8 + 父类所占的大小
+// sizeof(C) = 24 : 8 + 父类所占的大小
+// 如果不是virtual继承，那么结果是：8、12、16
+```
+
+**什么是虚继承？**
+
+> 为解决多重继承而出现的，比如：A -> B ->D; A -> C -> D，在类D中两次出现A，为节省空间，可以将对A的继承定义为虚继承。
+
+**为什么虚函数效率低？**
+
+> 虚函数需要一次间接寻址，而一般函数可以在编译时定位到函数的地址，虚函数要根据运行时情况定位，因而效率低。
+
+#### 11.3  多重继承
+
+**如何明确的调用多个父类中的同名函数？**
+
+```c++
+class A {
+  public:
+  void foo() {}
+};
+class B {
+  public:
+  void foo() {}
+};
+class C : public A, public B {};
+int main() {
+  D d;
+  d.A::foo() {};
+  return 0;
+}
+```
+
+```c++
+class A {};
+class B {};
+class C : public A, public B {};
+int main() {
+  C* pc = new C;
+  B* pb = dynamic_cast<B*>(pc);
+  A* pa = dynamic_cast<A*>(pc);
+  cout << (pc == pb) << endl;
+  cout << ((int)(pc) == (int)(pb)) << endl;
+}
+// 1, 隐式类型转换
+// 0
+```
+
+#### 11.4  纯虚函数
+
+> 包含纯虚函数的类是不能实例化的。
+
+> 虚指针，指向该类的虚函数表的指针。
+
+**C++如何阻止类被实例化？**
+
+- 构造函数声明为`private`
+- 抽象类（包含纯虚函数）
+
+**复制构造函数总是会默认生成的。**
+
+#### 11.5  运算符重载与RTTI
+
+> 待看。
 
 ### 第13章  数据结构基础
 
