@@ -868,3 +868,48 @@ node* reverse(node* head) {
 
 #### 13.9  时间复杂度
 
+> 一个算法中语句的执行次数称为语句频度或时间频度，记为$T(n)$。辅助函数$f(n)$，当$n\to\infty$时，两者的比值为不等于0的常数，则记$T(n) = O(f(n))$，称$f(n)$为算法的渐进时间复杂度，简称时间复杂度。
+
+$gcd(a, b) = gcd(b, a \% b)$
+
+**云计算的三层架构是什么：**
+
+- Iaas（Infrastructure as a Service）：提供CPU、网络、存储等基础硬件的云服务；
+- PaaS（Platform as a Service）：提供类似于操作系统层次的服务于管理，就像“云操作系统”；
+- SaaS（Software as a Service）：软件即服务。
+
+### 第14章  字符串
+
+#### 14.1  整数字符串转化
+
+> itoa函数。
+
+#### 14.2  字符数组和strcpy
+
+```c++
+char *strcpy(char *strDest, char *strSrc) {
+  assert((strDest != null) && (strSrc != null));
+  char *addr = strDest;
+  while ((*addr++ = *strSrc++) != '\0') {}
+  return addr;
+}
+```
+
+> 返回`char*`类型的作用是为了实现链式表达式，如：`int len = strlen(strcpy(strDest, "hello"));`
+
+#### 14.3  数组初始化和数组越界
+
+> 字符数组并不要求最后一个子符是`\0`，但字符数组的舒适化要求最后一个字符必须为`\0`。
+>
+> `char`的范围：$-128 \sim 127$，注意溢出问题。
+
+#### 14.4  数字流和数组声明
+
+> 不允许建立空数组。`int a[];`是错误的。
+
+#### 14.5  字符串其他问题
+
+
+
+#### 14.6  字符字串问题
+
