@@ -538,7 +538,7 @@ String & String::operate = (const String &other) {
 
 #### 10.6  多态
 
-> 多台可以简单地概括为“一个接口，多种方法”，在程序运行的过程中才决定调用的函数。
+> 多态可以简单地概括为“一个接口，多种方法”，在程序运行的过程中才决定调用的函数。
 >
 > 允许将子类类型的指针赋值给父类类型的指针。pFather = pChild;
 
@@ -890,7 +890,7 @@ $gcd(a, b) = gcd(b, a \% b)$
 char *strcpy(char *strDest, char *strSrc) {
   assert((strDest != null) && (strSrc != null));
   char *addr = strDest;
-  while ((*addr++ = *strSrc++) != '\0') {}
+  while ((*strDest++ = *strSrc++) != '\0') {}
   return addr;
 }
 ```
@@ -899,7 +899,7 @@ char *strcpy(char *strDest, char *strSrc) {
 
 #### 14.3  数组初始化和数组越界
 
-> 字符数组并不要求最后一个子符是`\0`，但字符数组的舒适化要求最后一个字符必须为`\0`。
+> 字符数组并不要求最后一个子符是`\0`，但字符数组的初始化要求最后一个字符必须为`\0`。
 >
 > `char`的范围：$-128 \sim 127$，注意溢出问题。
 

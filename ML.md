@@ -220,7 +220,7 @@ under certain conditions, we have：$d^* = p^*$
 
 #### Kernel
 
-$K(x, z) = \Phi(x)^T\Phi(z)$
+$K(x, z) = \phi(x)^T\phi(z)$
 
 在支持向量机算法中，用$K(x, z)$代替$<x, z>$($x$和$z$的內积)，产生更高维度的向量。
 
@@ -254,3 +254,4 @@ Loop, 直至收敛：
 
 ### 主成分分析（principal components analysis）
 
+**因子分析：当输入数据的维度远大于数据量时，需要降维**
