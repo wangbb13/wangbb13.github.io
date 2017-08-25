@@ -9,7 +9,7 @@ int main()
 {
     int i,j,k=0,n1,n2,p;
     bool flag;
-    cin.getline(a,10);     strlwr(a) ; n1=  strlen(a);
+    cin.getline(a,10);     strlwr(a);  n1=  strlen(a);
     cin.getline(b,1000000);strlwr(b);  n2=  strlen(b);
     for (i=0 ; i< n2 ;i++){
         if ((b[i-1]!=' ' && i!=0)|| (b[i+n1]!=' ' && i+n1!=n2)) continue;
