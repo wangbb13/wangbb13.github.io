@@ -19,4 +19,6 @@ int main() {
       ans = i;
     }
   }
+  cout << ans << endl;
+  return 0;
 }
