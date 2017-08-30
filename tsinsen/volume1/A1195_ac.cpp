@@ -9,6 +9,11 @@ struct node
 }a[20000];
 int n,m,K,ans;
 int f[20000],Time[20000],g[20000],dist[20000],sum[20000];
+// f: 在第i站最后一个旅客到站的时刻
+// time：到第i站最小的时刻
+// g：如果在第i站使用加速器，能够影响到的站点（至少是下一站）
+// dist：第i站到第i+1站的时间
+// sum：在第i站之前下车的旅客之和
 int main()
 {
     scanf("%d %d %d",&n,&m,&K);
@@ -29,7 +34,6 @@ int main()
     for (int i = 1;i <= m;i ++)
         ans += Time[a[i].target] - a[i].arrive;
 
-    // cout << ans << endl;
     while (K)
     {
         g[n] = n;
@@ -46,7 +50,6 @@ int main()
                 Max = sum[g[i]] - sum[i],j = i;
         if (!Max) break;
         ans -= Max;
-        // cout << Max << " " << j << endl;
         dist[j] --;
         K --;
         Time[1] = 0;
