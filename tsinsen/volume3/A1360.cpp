@@ -50,11 +50,11 @@ int main()
 		int y0 = py[i];
 		//x >= x0
 		s = 0;
-		for (int j = 0; j < n; j ++)
+		for (int j = 0; j < n; j ++)	// 找到在(x0, y0)右边的点，横坐标改为相对坐标
 			if (px[j] > x0)
 				pn[s ++] = (Pair){py[j], px[j] - x0};
-		pn[s ++] = (Pair){0, w - x0};
-		pn[s ++] = (Pair){h, w - x0};
+		pn[s ++] = (Pair){0, w - x0};	// 横轴最右边的点
+		pn[s ++] = (Pair){h, w - x0};	// 纵轴最大值、横轴相对最大值
 		check();
 		for (int j = 0; j < n; j ++)
 			pn[j].x = h - pn[j].x;
