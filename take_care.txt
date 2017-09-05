@@ -72,8 +72,51 @@ for(k=1;k<=n;k++)
 状态转移方程：dp[i][j] = dp[i-1][j] + p[i][i-1], j < i-1
               dp[i][i-1] = min { dp[i-1][j] + p[j][i] }
 
+谨慎编程，=和==不要写错了。。
+
+尽量用scanf和printf以减小输入、输出时间
+
+
+
 
 类型：
 动规、背包、贪心、搜索、二分、枚举、排序、模拟、数论、高精度
 DS：
 队列、堆、栈、单调队列、优先队列、多（双）指针、并查集
+
+
+STL:
+<string>: 字符串
+大小：s.size() 或者 s.length()
+截取：s.substr(pos, len)
+
+<deque>: 双端队列
+push_back
+push_front
+pop_back
+pop_front
+
+<map>: 底层数据结构：红黑树，因此数据是有序的
+count(): 可以用来判断一个键值是否存在
+
+<queue>:
+empty(): 队列是否为空
+front(): 访问队首元素
+back():  访问队尾元素
+push():
+pop():
+
+<priority_queue>: 优先队列
+empty():
+push():
+pop():
+top(): 访问堆顶元素
+
+<stack>: 
+empty():
+push():
+pop():
+top(): 访问栈顶元素
+
+<unordered_map>: 散列表，不再是红黑树作为底层数据结构
+
