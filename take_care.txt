@@ -90,7 +90,7 @@ STL:
 大小：s.size() 或者 s.length()
 截取：s.substr(pos, len)
 
-<deque>: 双端队列
+<deque>: 双端队列（用于实现单调队列）
 push_back
 push_front
 pop_back
