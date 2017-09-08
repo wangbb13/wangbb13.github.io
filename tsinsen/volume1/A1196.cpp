@@ -11,15 +11,29 @@ int binarySearch(int *array, int n, int tag) {
     } else if (array[mid] < tag) {
       l = mid + 1;
     } else {
-      r = mid - 1;
+      r = mid;
     }
   }
-  if (l == r) {
-    if (array[r] >= tag) { return r; }
-    else { return r+1; }
-  } else {
-    return l;
+  if (array[r] < tag) {
+    return r + 1;
   }
+  return r;
+  // while (l < r) {
+  //   mid = (l + r) / 2;
+  //   if (array[mid] == tag) {
+  //     return mid;
+  //   } else if (array[mid] < tag) {
+  //     l = mid + 1;
+  //   } else {
+  //     r = mid - 1;
+  //   }
+  // }
+  // if (l == r) {
+  //   if (array[r] >= tag) { return r; }
+  //   else { return r+1; }
+  // } else {
+  //   return l;
+  // }
 }
 
 int main(int argc, char const *argv[])
