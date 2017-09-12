@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <cmath>
 #include <cstdio>
@@ -90,17 +91,18 @@ int main() {
   printf("%d\n", ans);
   return 0;
 }
+*/
 
-/*
-不超时版本
-#include<iostream> 
-#include<cstdio> 
-#include<cstdlib> 
-#include<cstring> 
+// 不超时版本
+#include <iostream> 
+#include <cstdio> 
+#include <cstdlib> 
+#include <cstring> 
 
 using namespace std; 
 int s[9][9]; 
-int w[9][9] = { {6, 6, 6, 6, 6, 6, 6, 6, 6,}, 
+int w[9][9] = { 
+        {6, 6, 6, 6, 6, 6, 6, 6, 6,}, 
         {6, 7, 7, 7, 7, 7, 7, 7, 6,}, 
         {6, 7, 8, 8, 8, 8, 8, 7, 6,}, 
         {6, 7, 8, 9, 9, 9, 8, 7, 6,}, 
@@ -157,4 +159,3 @@ int main()
     printf("%d\n", ans); 
     return 0; 
 }
- */
