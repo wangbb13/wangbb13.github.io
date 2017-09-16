@@ -16,18 +16,26 @@ bool cmp(point a, point b) {
 
 void check() {
   sort(pn, pn + s, cmp);
-  int h = 0, t = -1, j = 1;
+  // int h = 0, t = -1, j = 1;
+  // for (int i = 0; i < s - 1; i++) {
+  //   while (h <= t && q[h] <= i) h++;
+  //   while (j < s && (h > t || pn[q[h]].y >= pn[j].x - pn[i].x)) {
+  //     q[++t] = j++;
+  //     while (h < t && pn[q[t]].y <= pn[q[t-1]].y) {
+  //       q[t-1] = q[t];
+  //       t--;
+  //     }
+  //   }
+  //   int w = min(pn[q[h]].y, pn[s-1].x - pn[i].x);
+  //   ans = max(ans, w);
+  // }
+  int ival;
   for (int i = 0; i < s - 1; i++) {
-    while (h <= t && q[h] <= i) h++;
-    while (j < s && (h > t || pn[q[h]].y >= pn[j].x - pn[i].x)) {
-      q[++t] = j++;
-      while (h < t && pn[q[t]].y <= pn[q[t-1]].y) {
-        q[t-1] = q[t];
-        t--;
-      }
+    ival = 20000;
+    for (int j = i + 1; j < s && (ival >= pn[j].x - pn[i].x); j++) {
+      ival = min(ival, pn[j].y);
     }
-    int w = min(pn[q[h]].y, pn[s-1].x - pn[i].x);
-    ans = max(ans, w);
+    ans = max(ans, min(ival, pn[s - 1].x - pn[i].x));
   }
 }
 
