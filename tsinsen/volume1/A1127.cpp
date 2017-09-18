@@ -44,3 +44,5 @@ int main() {
 7 2 14
 0 0 0
 */
+// 
+// dp[i][j][k][r] = max(dp[i-1][j][k][r], dp[i-1][j-1][k][r], ...)(8个) + nums[j][i-j] + nums[k][i-k] + nums[r][i-r]
