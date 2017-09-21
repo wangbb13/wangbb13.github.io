@@ -255,3 +255,6 @@ Loop, 直至收敛：
 ### 主成分分析（principal components analysis）
 
 **因子分析：当输入数据的维度远大于数据量时，需要降维**
+
+### Pattern Recognition and Machine Learning
+
