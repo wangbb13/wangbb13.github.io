@@ -1,3 +1,8 @@
 *.pyc
 *.pyo
 *.db
+*.sqlite3
+*.data
+*.info
+research/generator/app/
+research/generator/version0/
