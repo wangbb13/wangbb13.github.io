@@ -1,0 +1,54 @@
+/*
+ * ====================  generate fixed entity  ====================
+ * 
+ * 
+ * PART I : 
+ * 
+ *               f_ent_1     f_ent_2           f_ent_i
+ *                   |\           A              /| 
+ *             (conn1) \  (conn2) |     (conni) /
+ *                      \         |            /
+ *                (data) \|       V (data)   |/ (data)
+ *                     gen_ents_parent_procedure
+ *                                |
+ *                                |
+ *                                V
+ *                        collect all data
+ * 
+ * 
+ * ====================    generate fixed end   ====================
+ * 
+ * 
+ * 
+ * ====================generate dynamic entities====================
+ * 
+ * 
+ * PART II : 
+ * 
+ *           gen_src_ent_client2        gen_tgt_ent_cilent3
+ *              A       |\                    /|      A
+ *             s|         \                 /         |s
+ *             o|  (conn2) \              / (conn3)   |o
+ *             m|           \           /             |m
+ *             e|        gen_one_rel_parent           |e
+ *              |                |   A                |
+ *             i|        (conn1) |   |                |i
+ *             n|                |   | (rel_data)     |n
+ *             f|                V   |                |f
+ *             o|          gen_rel_client1            |o
+ *              |                A   A                |
+ *              | (src ent node) |   | (tgt ent node) |
+ *              |________________|   |________________|
+ * 
+ * 
+ * PART III : 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * ====================  generate dynamic end   ====================
+ */
