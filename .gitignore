@@ -4,5 +4,6 @@
 *.sqlite3
 *.data
 *.info
+*.exe
 research/generator/app/
 research/generator/version0/
