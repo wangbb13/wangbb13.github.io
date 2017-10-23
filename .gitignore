@@ -4,8 +4,12 @@
 *.sqlite3
 *.data
 *.info
+<<<<<<< HEAD
 *.txt
 *.doc
 *.docx
+=======
+*.exe
+>>>>>>> 8558c559da1b11397e3c74b7647a7226346ba588
 research/generator/app/
 research/generator/version0/

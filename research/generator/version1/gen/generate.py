@@ -8,6 +8,7 @@ import sqlite3
 
 sys.path.append('../distributions')
 sys.path.append('../model')
+import pwl
 from pwl import PWL
 from models import Store
 
@@ -166,7 +167,7 @@ class GenDDR(object):
     self.src_node_cnt = 0
     self.tgt_node_cnt = 0
     self.src_fake_cnt = 0
-    self.tgt_fake_cnt = 0
+    self.tgt_fake_cnt = 0 
     # compress degree list, to accelerate
     self.step = 1 # TODO: config info, compress step
     self.pwl_instance = PWL(0, tau, tau1, tau2)
@@ -214,7 +215,7 @@ class GenDDR(object):
     ii = 0
     for i in range(int(math.floor(mx_dgre / self.step))):
       s = 0
-      for j in range(i*self.step, i*self.step + step):
+      for j in range(i*self.step, i*self.step + self.step):
         s += dlt_dgre[j]
       cmprs_dgre.append(s)
       ii = i
@@ -254,11 +255,11 @@ class GenDDR(object):
         new += [i for i in range(end_i, end_i + more)]
         extra_nodes += more
         end_i += more
-        # 
+        # select nodes from new nodes
         new_i = 0
         rtn_vector += new[new_i:new_i + cmprs_dgre[0]] * self.step
         new_i += cmprs_dgre[0]
-        # 
+        # select nodes from existing nodes
         j = 0
         for i in range(1, len(cmprs_dgre)):
           comp_size = cmprs_dgre[i] - len(dgre_nodes[j])
@@ -298,7 +299,7 @@ class GenDDR(object):
 
   def add_edge_info(self, src_id, tgt_id, out_i, in_i):
     sql = 'select * from %s where src_id = %s and tgt_id = %s' % (self.rel_dict['alias'], src_id, tgt_id)
-    res = db_handler.query()
+    res = db_handler.query(sql)
     if len(res) == 0:
       # deal with sth about out degree
       for i in range(len(self.node_out_degree), out_i + 1):
@@ -363,9 +364,9 @@ class GenDDR(object):
     rel_data = []
     if isinstance(self.dic['in']['lambd'], int):
       # compute in vector
-      pwl_instance.set_nodes(self.tgt_fake_cnt)
-      pwl_instance.dtmn_max_degree()
-      max_in_degree = pwl_instance.max_d1
+      self.pwl_instance.set_nodes(self.tgt_fake_cnt)
+      self.pwl_instance.dtmn_max_degree()
+      max_in_degree = self.pwl_instance.max_d1
       cur_in_degree = pwl.get_node_count(self.tgt_fake_cnt, max_in_degree, self.tau)
       delta = max_in_degree - len(self.in_degree_nums)
       last_in_degree = self.in_degree_nums[:] + [0] * delta
@@ -382,9 +383,9 @@ class GenDDR(object):
         return
       # do not need to send extra data
       # compute out vector
-      pwl_instance.set_nodes(self.src_fake_cnt)
-      pwl_instance.dtmn_max_degree()
-      maxk1, maxk2, cur_out_degree = pwl_instance.dtmn_max_degree_2()
+      self.pwl_instance.set_nodes(self.src_fake_cnt)
+      self.pwl_instance.dtmn_max_degree()
+      maxk1, maxk2, cur_out_degree = self.pwl_instance.dtmn_max_degree_2()
       delta = len(cur_out_degree) - len(self.out_degree_nums)
       last_out_degree = self.out_degree_nums[:] + [0] * delta
       delta_out_degree = []
@@ -401,9 +402,9 @@ class GenDDR(object):
       # do not need to send extra data
     else:
       # compute out vector
-      pwl_instance.set_nodes(self.src_fake_cnt)
-      pwl_instance.dtmn_max_degree()
-      max_out_degree = pwl_instance.max_d1
+      self.pwl_instance.set_nodes(self.src_fake_cnt)
+      self.pwl_instance.dtmn_max_degree()
+      max_out_degree = self.pwl_instance.max_d1
       cur_out_degree = pwl.get_node_count(self.src_fake_cnt, max_out_degree, self.tau)
       delta = max_out_degree - len(self.out_degree_nums)
       last_out_degree = self.out_degree_nums[:] + [0] * delta
@@ -420,9 +421,9 @@ class GenDDR(object):
         return
       # do not need to send extra data
       # compute out vector
-      pwl_instance.set_nodes(self.tgt_fake_cnt)
-      pwl_instance.dtmn_max_degree()
-      maxk1, maxk2, cur_in_degree = pwl_instance.dtmn_max_degree_2()
+      self.pwl_instance.set_nodes(self.tgt_fake_cnt)
+      self.pwl_instance.dtmn_max_degree()
+      maxk1, maxk2, cur_in_degree = self.pwl_instance.dtmn_max_degree_2()
       delta = len(cur_in_degree) - len(self.in_degree_nums)
       last_in_degree = self.in_degree_nums[:] + [0] * delta
       delta_in_degree = []

@@ -132,10 +132,12 @@ class PWL(object):
 def test():
   while True:
     nodes = int(input())
-    pwl = PWL(nodes, 1.49, 1.15, 2.7)
-    k1, k2, _ = pwl.dtmn_max_degree_2()
+    tau   = float(input())
+    pwl = PWL(nodes, tau, 1.15, 2.7)
+    pwl.dtmn_max_degree()
+    # k1, k2, _ = pwl.dtmn_max_degree_2()
     print(pwl.max_d1)
-    print(k1, k2)
+    # print(k1, k2)
 
 
 if __name__ == '__main__':
