@@ -4,5 +4,8 @@
 *.sqlite3
 *.data
 *.info
+*.txt
+*.doc
+*.docx
 research/generator/app/
 research/generator/version0/
