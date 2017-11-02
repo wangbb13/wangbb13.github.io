@@ -18,7 +18,7 @@ user_ceiling = 100000
 cmt_tau      = 1.71
 thmb_up_tau  = 1.62
 
-gen_start_time = datetime(2017, 10, 1, 0, 0, 0)
+gen_start_time = datetime(2017, 10, 20, 0, 0, 0)
 day = [
 {'mu': 2, 'sigma': 5, 'hours': 5},    # 00:00 - 05:00
 {'mu': 10, 'sigma': 2, 'hours': 4},   # 05:00 - 09:00
@@ -31,15 +31,19 @@ day = [
 
 alphabet = list('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.,?!~@#$%^&*()+-*/;')
 al_len   = len(alphabet)
+cad_cmt_cnt = len(open('cad_comments.txt', 'r').readlines())
+cad_sta_cnt = len(open('cad_status.txt', 'r').readlines())
 def gen_content():
   # TODO: better
-  size = random.randint(1, 20)
-  random.shuffle(alphabet)
-  return ''.join(alphabet[:size])
+  # size = random.randint(1, 20)
+  # random.shuffle(alphabet)
+  # return ''.join(alphabet[:size])
+  return str(random.randint(1, cad_sta_cnt))
 
 def gen_comment():
   # TODO: better
-  return gen_content()
+  # return gen_content()
+  return str(random.randint(1, cad_cmt_cnt))
 
 # input  : gen n status
 # method : select n users randomly
