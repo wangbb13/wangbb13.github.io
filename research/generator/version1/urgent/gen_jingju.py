@@ -15,8 +15,8 @@ cmt_handler  = open('comment.txt', 'w')
 thm_handler  = open('thumbup.txt', 'w')
 
 user_ceiling = 100000
-cmt_tau      = 1.71
-thmb_up_tau  = 1.62
+cmt_tau      = 1.83
+thmb_up_tau  = 1.71
 
 gen_start_time = datetime(2017, 10, 20, 0, 0, 0)
 day = [
@@ -51,17 +51,15 @@ def gen_comment():
 class GenFeed(object):
   def __init__(self, src_ceiling):
     self.src_num = src_ceiling
-    self.tgt_l = 1
-    self.tgt_r = 1
     self.src_nodes = [i for i in range(1, src_ceiling + 1)]
 
   # return: [(src_name : id, tgt_name : id)]
-  def gen(self, n):
-    self.tgt_r += n 
+  def gen(self, s, n):
+    tgt_l = s 
+    tgt_r = s + n 
     random.shuffle(self.src_nodes)
     res_s = [self.src_nodes[si] for si in range(n)]
-    res_t = [ti for ti in range(self.tgt_l, self.tgt_r)]
-    self.tgt_l = self.tgt_r
+    res_t = [ti for ti in range(tgt_l, tgt_r)]
     return list(zip(res_s, res_t))
 
 
@@ -254,6 +252,8 @@ def test():
   sta_extra = 0
   user_prefix = 'user'
   sta_prefix = 'status'
+  last_status = -1 
+  cur_status  = 0 
   # version 1, simple
   try:
     while cur_time < now_time:
@@ -261,15 +261,26 @@ def test():
       for cfg in day:
         # generate sta_n status
         sta_n = int(random.gauss(cfg['mu'], cfg['sigma']))
-        res = gen_feed.gen(sta_n)
+        if sta_n <= 0:
+          continue
+        res = gen_feed.gen(sta_idx, sta_n)
         time_r = cfg['hours'] * 3600
         stamp = [str(cur_time + timedelta(0, random.randint(0, time_r))).split('.')[0] \
         for x in range(sta_n)]
         # release status, dump records to txt
         for i in range(sta_n):
           string = user_prefix + str(res[i][0]) + '#' + stamp[i] + '#' + gen_content() + '#' + sta_prefix + str(res[i][1]) + '\n'
+          last_status = cur_status
+          cur_status = res[i][1]
+          if cur_status < last_status:
+            print('[276]', last_status)
           feed_handler.write(string)
         sta_idx += sta_n
+        # try:
+        #   sta_idx = max(sta_n + sta_idx, res[sta_n-1][1])
+        # except Exception as e:
+        #   print(sta_n, len(res))
+        #   raise e
         # clear extra status
         sta_extra = 0
         # generate comment
@@ -281,10 +292,14 @@ def test():
             string = user_prefix + str(random.randint(1, user_ceiling)) + '#' + \
             str(cur_time + timedelta(0, random.randint(0, time_r))).split('.')[0] + \
             '#' + gen_content() + '#' + sta_prefix + str(i) + '\n'
+            last_status = cur_status
+            cur_status = i 
+            if cur_status < last_status:
+              print('[293]')
             feed_handler.write(string)
           for sta_id in res:
             string = sta_prefix + str(sta_id) + '#' + \
-            str(cur_time + timedelta(0, random.randint(0, 24*60*60))).split('.')[0] + \
+            str(cur_time + timedelta(0, random.randint(time_r, 24*60*60))).split('.')[0] + \
             '#' + gen_comment() + '#' + user_prefix + str(random.randint(1, user_ceiling)) + '\n'
             cmt_handler.write(string)
         sta_idx += extra
@@ -296,6 +311,10 @@ def test():
             string = user_prefix + str(random.randint(1, user_ceiling)) + '#' + \
             str(cur_time + timedelta(0, random.randint(0, time_r))).split('.')[0] + \
             '#' + gen_content() + '#' + sta_prefix + str(i) + '\n'
+            last_status = cur_status
+            cur_status = i 
+            if cur_status < last_status:
+              print('[312]')
             feed_handler.write(string)
           for sta_id in res:
             string = sta_prefix + str(sta_id) + '#' + user_prefix + str(random.randint(1, user_ceiling)) + '\n'
