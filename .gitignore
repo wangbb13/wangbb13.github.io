@@ -9,5 +9,6 @@
 *.doc
 *.docx
 *.exe
+*.pdf
 research/generator/app/
 research/generator/version0/
