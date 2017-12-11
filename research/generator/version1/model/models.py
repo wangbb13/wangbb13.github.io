@@ -13,7 +13,7 @@ class Store(object):
     self.cursor  = None
 
   def connect(self):
-    self.conn    = sqlite3.connect(db_name)
+    self.conn    = sqlite3.connect(self.db_name)
     self.cursor  = self.conn.cursor()
 
   def close(self):
@@ -21,21 +21,21 @@ class Store(object):
       self.cursor.close()
       self.conn.close()
     except Exception as e:
-      print(e)
+      raise e
 
-  def create_tbl(self, sql):
+  def execute_sql(self, sql):
     try:
       self.cursor.execute(sql)
       self.conn.commit()
     except Exception as e:
-      print(e)
+      raise e
 
-  def create_db(self, script):
+  def execute_script(self, script):
     try:
       self.cursor.executescript(script)
       self.conn.commit()
     except Exception as e:
-      print(e)
+      raise e
 
   def insert_one(self, sql, data=None):
     try:
@@ -46,14 +46,16 @@ class Store(object):
         self.cursor.execute(sql, data)
         self.conn.commit()
     except Exception as e:
-      print(e)
+      raise e
 
   def insert_many(self, sql, datum):
     try:
       self.cursor.executemany(sql, datum)
       self.conn.commit()
     except Exception as e:
-      print(e)
+      print('[model/models.py insert_many()]: ')
+      print(sql, datum)
+      raise e
 
   def query(self, sql):
     try:
@@ -62,4 +64,4 @@ class Store(object):
       return val
     except Exception as e:
       return []
-      print(e)
+      raise e

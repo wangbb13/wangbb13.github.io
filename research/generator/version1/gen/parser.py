@@ -172,10 +172,8 @@ def legal(g_dict):
 
 
 def test():
-  import sys
-  sys.path.append('../test')
-  import config
-  legal(config.gdb)
+  from test import test_scheme
+  legal(test_scheme)
 
 
 if __name__ == '__main__':

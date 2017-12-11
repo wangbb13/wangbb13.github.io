@@ -59,6 +59,15 @@ class PWL(object):
   def set_nodes(self, n):
     self.nodes = n
 
+  def set_lambd(self, l):
+    self.lambd = l 
+
+  def set_lambd1(self, l):
+    self.lambd1 = l 
+
+  def set_lambd2(self, l):
+    self.lambd2 = l 
+
   def set_threv(self, val):
     self.threv = val
 
@@ -75,15 +84,16 @@ class PWL(object):
         l = mid + 1
     # determine r s.t. total number of nodes <= the number of nodes
     r -= 1
-    l = 1
+    l = int(r / 2)
+    # print('ans r: ', r)
     while l < r:
       mid = int((l + r) / 2)
       node_sum = sum(get_node_count(self.nodes, mid, self.lambd))
       if node_sum > self.nodes:
         r = mid
-      elif node_sum == self.nodes:
-        r = mid + 1
-        break
+      # elif node_sum == self.nodes:
+      #   r = mid + 1
+      #   break
       else:
         l = mid + 1
     self.max_d1 = max((r - 1), 0)
@@ -132,12 +142,12 @@ class PWL(object):
 def test():
   while True:
     nodes = int(input())
-    tau   = float(input())
-    pwl = PWL(nodes, tau, 1.15, 2.7)
+    # tau   = float(input())
+    pwl = PWL(nodes, 1.49, 1.15, 2.7)
     pwl.dtmn_max_degree()
-    # k1, k2, _ = pwl.dtmn_max_degree_2()
-    print(pwl.max_d1)
-    # print(k1, k2)
+    k1, k2, _ = pwl.dtmn_max_degree_2()
+    print('%-4d %-4d %-4d' % (pwl.max_d1, k1, k2))
+    
 
 
 if __name__ == '__main__':

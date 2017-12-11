@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-gdb = {
+test_scheme = {
   'alias': 'opera',
   'entity': [
     {

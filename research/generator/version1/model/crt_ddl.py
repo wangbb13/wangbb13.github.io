@@ -2,21 +2,20 @@
 
 import os
 import sys
-sys.path.append('../')
-from gen import parser
+from gen import legal
 
-sql_tabl = 'create table %s ( \n%s); \n\n'
-sql_pkey = '  primary key (%s), \n'
-sql_fkey = '  foreign key (%s) references %s (%s), \n'
-sql_comm = '  %s      varchar(%d), \n'
-sql_time = '  %s      timestamp, \n'
+sql_tabl = 'create table %s ( \n%s \n); \n\n'
+sql_pkey = '  primary key (%s)'
+sql_fkey = '  foreign key (%s) references %s (%s)'
+sql_comm = '  %s      varchar(%d)'
+prmy_sql_comm = '  %s      varchar(%d) primary key'
+sql_time = '  %s      timestamp'
 
 ent_set = set()
 rel_set = set()
 key_size = {}
 
 def pre_manipulate(gdb):
-  parser.legal(gdb)
   for ent in gdb['entity']:
     ent_set.add(ent['alias'])
     size = 12
@@ -28,21 +27,27 @@ def pre_manipulate(gdb):
     rel_set.add(rel['alias'])
 
 
+def count_size(gdb):
+  res = {}
+  for ent in gdb['entity']:
+    res[ent['alias']] = ent['ceiling']
+  return res
+
+
 def ent_sql(ent_dict):
   tbl = ent_dict['alias']
-  content = sql_comm % (tbl + '_id', key_size[tbl])
+  content = prmy_sql_comm % (tbl + '_id', key_size[tbl])
   if 'tag' in ent_dict:
     if ent_dict['tag']['mode'] == 'respective':
       fac = int(ent_dict['tag']['count'][-1])
       cnt = len(ent_dict['tag']['source']) * fac
       for tg in ent_dict['tag']['source']:
         cnt += key_size[tg] * fac
-      content = content + sql_comm % ('tags', cnt)
+      content =  content + ', \n' + sql_comm % ('tags', cnt)
     else:
       fac = int(ent_dict['tag']['count'][-1])
       cnt = fac * (max([key_size[x] for x in ent_dict['tag']['source']]) + 1)
-      content = content + sql_comm % ('tags', cnt)
-  content = content + sql_pkey % (tbl + '_id')
+      content = content + ', \n' + sql_comm % ('tags', cnt)
   return sql_tabl % (tbl, content)
 
 
@@ -50,15 +55,16 @@ def rel_sql(rel_dict):
   tbl = rel_dict['alias']
   src = rel_dict['source']
   tgt = rel_dict['target']
-  content = sql_comm % ('src_id', key_size[src]) \
-          + sql_comm % ('tgt_id', key_size[tgt]) \
-          + sql_pkey % ('src_id, tgt_id') \
-          + sql_fkey % ('src_id', src, src + '_id') \
+  content = sql_comm % ('src_id', key_size[src]) + ', \n' \
+          + sql_comm % ('tgt_id', key_size[tgt]) + ', \n' \
+          + sql_pkey % ('src_id, tgt_id') + ', \n' \
+          + sql_fkey % ('src_id', src, src + '_id') + ', \n' \
           + sql_fkey % ('tgt_id', tgt, tgt + '_id')
   return sql_tabl % (tbl, content)
 
 
 def tbl_sql(gdb):
+  legal(gdb)
   pre_manipulate(gdb)
   ans = ''
   for ent in gdb['entity']:
@@ -68,11 +74,25 @@ def tbl_sql(gdb):
   return ans
 
 
+def delete_sql(gdb):
+  res = ''
+  for ent in gdb['entity']:
+    res = res + 'delete from %s \n' % (ent['alias'])
+  for rel in gdb['relation']:
+    res = res + 'delete from %s \n' % (rel['alias'])
+  return res
+
+
 def test():
-  sys.path.append('../test')
-  import config
-  ddl = tbl_sql(config.gdb)
-  print(ddl)
+  if len(sys.argv) != 2:
+    print('Usage: python crt_ddl.py filename')
+    return
+  filename = sys.argv[1]
+  from test import test_scheme
+  ddl = tbl_sql(test_scheme)
+  with open(filename, 'w') as f:
+    f.write(ddl)
+  print('done')
 
 
 if __name__ == '__main__':
