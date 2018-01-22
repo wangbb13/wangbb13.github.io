@@ -65,6 +65,16 @@ class GenDDR(object):
     # compress degree list, to accelerate
     self.step = 1 # TODO: config info, compress step
     self.pwl_instance = PWL(0, self.tau, self.tau1, self.tau2)
+    
+    self.mu_parameter = 0.4 # used to determine community belongs
+    self.ncomunty = 10  # community id: 0, 1, ...
+    self.comunty_nodes = []   # community: set of nodes
+    # node id: start from 1
+    self.node_comunty_n_indegree = [[]]  # [d1, ..., dn]
+    self.node_comunty_n_outdegree = [[]] # [d1, ..., dn]
+    self.node_comunty_ident = [set()]    # the communities node i belongs to
+    # self.node_comunty_in_ident = [-1]  # the community node i belongs to, in degree
+    # self.node_comunty_out_ident = [-1] # ditto, out degree
 
   def gen_node(self, one_gen):
     if one_gen['type'] == 'gaussian':
@@ -105,6 +115,7 @@ class GenDDR(object):
           if self.src_r_index > 10000:
             self.parent_conn.send((-1, self.src_fake_cnt))
             break
+        self.parent_conn.send((-1, self.src_fake_cnt))
       else: # e.g. user -> status
         # src_ent_gen = GenFE(self.src_dic, self.ent_size, self.db_name)
         # tgt_ent_gen = GenFE(self.tgt_dic, self.ent_size, self.db_name)
@@ -438,3 +449,129 @@ class GenDDR(object):
       # send end
     return (1, extra_out, extra_in)
 
+  def homogeneous_with_uniform_comunity(self, out_vector, in_vector):
+    last_old_node = self.src_r_index - 1
+    new_nodes = max(max(out_vector), max(in_vector)) - last_old_node 
+    tmp_comunty_size = [[_, math.ceil(new_nodes / self.ncomunty)] for _ in range(self.ncomunty)]
+    node_comunty_degree = [[0 for _ in range(self.ncomunty)] for _ in range(new_nodes)] # [:][0] means the community
+    node_comunty_ident = [set() for _ in range(new_nodes)]
+    self.node_comunty_n_indegree.extend(node_comunty_degree)
+    self.node_comunty_n_outdegree.extend(node_comunty_degree)
+    # self.node_comunty_in_ident.extend(node_comunty_ident)
+    # self.node_comunty_out_ident.extend(node_comunty_ident)
+    self.node_comunty_ident.extend(node_comunty_ident)
+    random.shuffle(out_vector)
+    res_rel_data = [] # [(a, b), ...]
+    while len(out_vector) > 0 and len(in_vector) > 0:
+      out_node = out_vector[0]
+      if len(self.node_comunty_ident[out_node]) == 0: # homeless
+        tmp_index = 0
+        match_old = False
+        sort_tmp_comunty_size = sorted(tmp_comunty_size, key=lambda x: x[1], reverse=True)
+        while tmp_index < self.ncomunty:
+          recommend_cs = []
+          mx_val = sort_tmp_comunty_size[tmp_index][1]
+          while tmp_index < self.ncomunty and sort_tmp_comunty_size[tmp_index][1] == mx_val:
+            recommend_cs.append(sort_tmp_comunty_size[tmp_index][0])
+            tmp_index += 1
+          match = False
+          for recom_c in recommend_cs:
+            candidate_in_nodes = [node for node in in_vector if node != out_node and recom_c in self.node_comunty_ident[node]]
+            cand_size = len(candidate_in_nodes)
+            skip = False
+            if cand_size > 0:
+              for in_node in candidate_in_nodes:
+                if (out_node, in_node) not in res_rel_data: # find a legal edge
+                  # scene: new_node -> old_node
+                  res_rel_data.append((out_node, in_node))
+                  self.comunty_nodes[recom_c].add(out_node)
+                  self.node_comunty_ident[out_node].add(recom_c)
+                  self.node_comunty_n_indegree[in_node][recom_c] += 1 
+                  self.node_comunty_n_outdegree[out_node][recom_c] += 1 
+                  tmp_comunty_size[recom_c][1] -= 1 
+                  out_vector.remove(out_node)
+                  in_vector.remove(in_node)
+                  skip = True 
+                  match = True 
+                  match_old = True 
+                  break
+            if skip:
+              break
+          if match:
+            break
+        if not match_old:
+          # scene: new_node -> new_node
+          recom_c = sort_tmp_comunty_size[0][0]
+          for in_node in in_vector:
+            if in_node != out_node and (out_node, in_node) not in res_rel_data:
+              res_rel_data.append((out_node, in_node))
+              self.comunty_nodes[recom_c].add(out_node)
+              self.comunty_nodes[recom_c].add(in_node)
+              self.node_comunty_ident[out_node].add(recom_c)
+              self.node_comunty_ident[in_node].add(recom_c)
+              self.node_comunty_n_indegree[in_node][recom_c] += 1 
+              self.node_comunty_n_outdegree[out_node][recom_c] += 1 
+              tmp_comunty_size[recom_c][1] -= 2
+              out_vector.remove(out_node)
+              in_vector.remove(in_node)
+              break
+      else: # in a community, i.e. old_node
+        # simple
+        old_comunty = self.node_comunty_ident[out_node]
+        sort_tmp_comunty_size = sorted(tmp_comunty_size, key=lambda x: x[1], reverse=True)
+        mx_val = sort_tmp_comunty_size[0][1]
+        recommend_cs = []
+        tmp_indx = 0 
+        while tmp_index < self.ncomunty:
+          if sort_tmp_comunty_size[tmp_index][1] == mx_val:
+            recommend_cs.append(sort_tmp_comunty_size[tmp_index][0])
+          tmp_index += 1
+        recm_cs_set = set(recommend_cs)
+        match = False
+        inter_set = old_comunty.intersection(recm_cs_set)
+        if len(inter_set) > 0:
+          # able to add new node
+          candidate_in_nodes = [node for node in in_vector if node != out_node and len(self.node_comunty_ident[node]) == 0]
+          if len(candidate_in_nodes) > 0:
+            for in_node in candidate_in_nodes:
+              if (out_node, in_node) not in res_rel_data:
+                res_rel_data.append((out_node, in_node))
+                match = True
+                for recm_c in inter_set:
+                  self.comunty_nodes[recm_c].add(in_node)
+                  self.node_comunty_ident[in_node].add(recm_c)
+                  self.node_comunty_n_indegree[in_node][recm_c] += 1 
+                  self.node_comunty_n_outdegree[out_node][recm_c] += 1 
+                  tmp_comunty_size[recm_c][1] -= 1 
+                out_vector.remove(out_node)
+                in_vector.remove(in_node)
+                break
+        if not match:
+          for in_node in in_vector:
+            if in_node != out_node and (out_node, in_node) not in res_rel_data:
+              res_rel_data.append((out_node, in_node))
+              in_node_comuntys = self.node_comunty_ident[in_node]
+              for in_node_cmunty in in_node_comuntys:
+                self.node_comunty_n_indegree[in_node][in_node_cmunty] += 1 
+              for out_node_comunty in old_comunty:
+                self.node_comunty_n_outdegree[out_node][out_node_comunty] += 1
+              # adjust for in_node 
+              in_degree = sum(self.node_comunty_n_indegree[in_node])
+              for c in range(self.ncomunty):
+                if self.node_comunty_n_indegree[in_node][c] * 1. / in_degree > self.mu_parameter:
+                  # in_node belongs to community c
+                  self.node_comunty_ident[in_node].add(c)
+                  self.comunty_nodes[c].add(in_node)
+              # adjust for out_node
+              out_degree = sum(self.node_comunty_n_outdegree[out_node])
+              for c in range(self.ncomunty):
+                if self.node_comunty_n_outdegree[out_node][c] * 1. / out_degree > self.mu_parameter:
+                  self.node_comunty_ident[out_node].add(c)
+                  self.comunty_nodes[c].add(out_node)
+              out_vector.remove(out_node)
+              in_vector.remove(in_node)
+              break
+    return res_rel_data
+  
+  def heterogeneous_with_uniform_comunity(self, out_vector, in_vector):
+    # yi gou network, same size community

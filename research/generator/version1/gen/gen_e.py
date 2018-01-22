@@ -6,7 +6,7 @@ from model import Store
 
 
 def gen_data(ent, ent_size, start_index, n):
-  rtn   = [()] * n
+  rtn = [()] * n
   l = start_index
   r = l + n
   if 'tag' in ent:
