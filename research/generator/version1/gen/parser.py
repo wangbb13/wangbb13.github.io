@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 db_miss_alias = 'You miss the key alias of DB.'
 db_null_alias = 'The value of key alias can not be null.'
 # errors in entity
@@ -94,6 +96,7 @@ def legal(g_dict):
   tag_mode = set(['random', 'exclusive', 'respective'])
   # distr_set = set(['gaussian', 'uniform', 'power_law'])
   # check entities
+  # alias
   for e_dict in g_dict['entity']:
     try:
       assert 'alias' in e_dict
@@ -109,10 +112,12 @@ def legal(g_dict):
       raise ConfigError(ent_duplicate % (e_dict['alias']))
     ent_set.add(e_dict['alias'])
   for e_dict in g_dict['entity']:
+    # mode
     try:
       assert e_dict['mode'] in ent_mode
     except:
       raise ConfigError(ent_mode_option_err % (e_dict['alias']))
+    # tag
     if 'tag' in e_dict:
       try:
         assert isinstance(e_dict['tag']['source'], list)
@@ -127,15 +132,35 @@ def legal(g_dict):
         assert e_dict['tag']['mode'] in tag_mode
       except:
         raise ConfigError(ent_tag_mode_err % (e_dict['alias']))
+    # attr
+    if 'attr' in e_dict:
+      try:
+        assert isinstance(e_dict['attr'], list)
+      except:
+        raise ConfigError('the type of attr should be list')
+      for one_attr in e_dict['attr']:
+        try:
+          assert 'alias' in one_attr
+          assert isinstance(one_attr['alias'], str)
+          assert 'value' in one_attr
+          assert 'type' in one_attr['value']
+          assert isinstance(one_attr['value']['type'], type)
+          if 'range' in one_attr['value']:
+            assert isinstance(one_attr['value']['range'], list)
+        except:
+          raise ConfigError("One attr should be : \{'alias': 'XXX', 'value': \{'type': XXX, 'range'(optional): [...]\}\}")
+    # ceiling
     try:
       assert (isinstance(e_dict['ceiling'], int) or isinstance(e_dict['ceiling'], float)) and (e_dict['ceiling'] > 0)
     except:
       raise ConfigError(ceiling_err % (e_dict['alias']))
     if e_dict['mode'] == 'dynamic':
+      # suspend
       try:
         assert (isinstance(e_dict['suspend'], int) or isinstance(e_dict['suspend'], float)) and (e_dict['suspend'] >= 0)
       except:
         raise ConfigError(suspend_err % (e_dict['alias']))
+      # stage
       try:
         assert isinstance(e_dict['stage'], list)
       except:

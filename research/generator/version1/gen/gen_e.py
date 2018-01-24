@@ -3,15 +3,18 @@ import sys
 sys.path.append('../')
 import random
 from model import Store
+from gen import random_str
+from datetime import datetime, timedelta
 
+separator = ','
 
 def gen_data(ent, ent_size, start_index, n):
-  rtn   = [()] * n
+  rtn = [()] * n
   l = start_index
   r = l + n
   if 'tag' in ent:
     for i in range(l, r):
-      _id = str(i)
+      _id = i
       _tag = ''
       if ent['tag']['mode'] == 'random':
         n = random.randint(ent['tag']['count'][0], ent['tag']['count'][1])
@@ -22,7 +25,7 @@ def gen_data(ent, ent_size, start_index, n):
         for j in range(n-1):
           t_ent = ent['tag']['source'][random.randint(0, b)]
           t_upp = ent_size[t_ent]
-          _tag  = _tag + ' ' + t_ent + str(random.randint(1, t_upp))
+          _tag  = _tag + separator + t_ent + str(random.randint(1, t_upp))
       elif ent['tag']['mode'] == 'exclusive':
         b = len(ent['tag']['source'])
         l = min(b, min(ent['tag']['count']))
@@ -36,7 +39,7 @@ def gen_data(ent, ent_size, start_index, n):
           for j in range(1, n):
             t_ent = ent['tag']['source'][p[j]]
             t_upp = ent_size[t_ent]
-            _tag  = _tag + ' ' + t_ent + str(random.randint(1, t_upp))
+            _tag  = _tag + separator + t_ent + str(random.randint(1, t_upp))
       else: # respective
         for t_ent in ent['tag']['source']:
           t_upp = ent_size[t_ent]
@@ -50,11 +53,30 @@ def gen_data(ent, ent_size, start_index, n):
               if res not in tp_set:
                 break
             tp_set.add(res)
-            _tag = _tag + ' ' + t_ent + str(res)
+            _tag = _tag + separator + t_ent + str(res)
       rtn[i-l] = (_id, _tag)
+  if 'attr' in ent:
+    # TODO: how to generate reasonable random str ? 
+    # TODO: how to genreate reasonable timestamp ? 
+    # TODO: other types ? 
+    for i in range(l, r):
+      recd = [i]
+      for one_attr in ent['attr']:
+        if 'range' in one_attr['value']:
+          idx = random.randint(0, len(one_attr['value']['range']))
+          recd.append(one_attr['value']['range'][idx])
+        else:
+          if one_attr['value']['type'] == str:
+            str_len = random.randint(1, 100)
+            recd.append(random_str.random_str(str_len))
+          elif one_attr['value']['type'] == datetime:
+            start_time = datetime.now() - timedelta(1, 0, 0)
+            seconds = 24 * 60 * 60
+            recd.append(random_str.random_time(start_time, seconds))
+      rtn[i-l] = tuple(recd)
   else:
     for i in range(l, r):
-      rtn[i-l] = (str(i), )
+      rtn[i-l] = (i, )
   return rtn
 
 
@@ -75,8 +97,11 @@ class GenFE(object):
   def set_start_idx(self, n):
     self.start_idx = n
 
-  def start(self, count):
-    # count = self.ent['ceiling']
+  def start(self, max_id):
+    # max_id: the max id should be generated
+    count = max_id - start_idx + 1
+    if count < 1:
+      return 
     data = gen_data(self.ent, self.ent_size, self.start_idx, count)
     self.start_idx += count
     # db first
