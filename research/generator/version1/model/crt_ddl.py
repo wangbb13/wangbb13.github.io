@@ -2,13 +2,16 @@
 
 import os
 import sys
+sys.path.append('../')
+
 from gen import legal
+from datetime import datetime
 
 sql_tabl = 'create table %s ( \n%s \n); \n\n'
 sql_pkey = '  primary key (%s)'
 sql_fkey = '  foreign key (%s) references %s (%s)'
 sql_comm = '  %s      varchar(%d)'
-prmy_sql_comm = '  %s      varchar(%d) primary key'
+prmy_sql_comm = '  %s      int primary key'
 sql_time = '  %s      timestamp'
 
 ent_set = set()
@@ -36,7 +39,7 @@ def count_size(gdb):
 
 def ent_sql(ent_dict):
   tbl = ent_dict['alias']
-  content = prmy_sql_comm % (tbl + '_id', key_size[tbl])
+  content = prmy_sql_comm % (tbl + '_id')
   if 'tag' in ent_dict:
     if ent_dict['tag']['mode'] == 'respective':
       fac = int(ent_dict['tag']['count'][-1])
@@ -48,6 +51,19 @@ def ent_sql(ent_dict):
       fac = int(ent_dict['tag']['count'][-1])
       cnt = fac * (max([key_size[x] for x in ent_dict['tag']['source']]) + 1)
       content = content + ', \n' + sql_comm % ('tags', cnt)
+  if 'attr' in ent_dict:
+    for one_attr in ent_dict['attr']:
+      attr_name = one_attr['alias']
+      if one_attr['value']['type'] == datetime:
+        content = content + ', \n  ' + attr_name + '      timestamp'
+      elif one_attr['value']['type'] == str:
+        if 'range' in one_attr['value']:
+          max_l = max([len(x) for x in one_attr['value']['range']])
+          content = content + ', \n' + sql_comm % (attr_name, max_l)
+        else:
+          # TODO: more reasonable value ? 
+          content = content + ', \n' + sql_comm % (attr_name, 100)
+      # TODO: other type ? 
   return sql_tabl % (tbl, content)
 
 
@@ -88,8 +104,9 @@ def test():
     print('Usage: python crt_ddl.py filename')
     return
   filename = sys.argv[1]
-  from test import test_scheme
-  ddl = tbl_sql(test_scheme)
+  from mytest import test_scheme, zhihu_scheme
+  # ddl = tbl_sql(test_scheme)
+  ddl = tbl_sql(zhihu_scheme)
   with open(filename, 'w') as f:
     f.write(ddl)
   print('done')

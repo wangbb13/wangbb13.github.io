@@ -7,6 +7,7 @@ from model import Store
 from .gen_e import GenFE
 import random
 import math
+import gen.macro
 
 
 class GenDDR(object):
@@ -92,6 +93,9 @@ class GenDDR(object):
     generate node and edges 
     '''
     try:
+      rel_name = self.rel_dict['alias']
+      src_name = self.rel_dict['source']
+      tgt_name = self.rel_dict['target']
       if self.tgt_dic == None: # e.g. user -> user
         # src_ent_gen = GenFE(self.src_dic, self.ent_size, self.db_name)
         stage_len = len(self.src_dic['stage'])
@@ -102,20 +106,15 @@ class GenDDR(object):
           gen_n = self.gen_node(one_gen)
           # src_ent_gen.start(gen_n)
           self.src_r_index += gen_n
-          # TODO: give index to parent process
-          self.parent_conn.send((2, gen_n))
+          self.parent_conn.send((rel_name, src_name, macro.ADD_NODE, self.src_r_index))
           p1 = [self.src_l_index, self.src_r_index]
           p2 = p1[:]
-          res = self.gen_data(p1, p2)
-          # TODO : with res, max(res[1], res[2]) ? or sum(res[1], res[2])
-          # is this correct ?
-          if res[0] == 1:
-            self.src_r_index += (res[1] + res[2])
-            self.src_l_index = self.src_r_index
-          if self.src_r_index > 10000:
-            self.parent_conn.send((-1, self.src_fake_cnt))
-            break
-        self.parent_conn.send((-1, self.src_fake_cnt))
+          self.gen_data(p1, p2)
+          # res = self.gen_data(p1, p2)
+          # if res[0] == 1:
+          #   self.src_r_index += (res[1] + res[2])
+          #   self.src_l_index = self.src_r_index
+        self.parent_conn.send((rel_name, src_name, macro.FINISH_NODE, self.src_r_index))
       else: # e.g. user -> status
         # src_ent_gen = GenFE(self.src_dic, self.ent_size, self.db_name)
         # tgt_ent_gen = GenFE(self.tgt_dic, self.ent_size, self.db_name)
@@ -124,7 +123,7 @@ class GenDDR(object):
         src_stg_idx = 0
         tgt_stg_idx = 0
         # TODO: when should it stop 
-        while self.src_r_index < self.src_dic['ceiling'] or self.tgt_r_index < self.tgt_dic['ceiling']:
+        while self.src_r_index < self.src_dic['ceiling'] and self.tgt_r_index < self.tgt_dic['ceiling']:
           one_src_gen = self.src_dic['stage'][src_stg_idx]
           one_tgt_gen = self.tgt_dic['stage'][tgt_stg_idx]
           src_stg_idx = (src_stg_idx + 1) % src_stg_len
@@ -136,16 +135,19 @@ class GenDDR(object):
           self.src_r_index += gen_src_n
           self.tgt_r_index += gen_tgt_n
           # TODO: give index to parent process
-          self.parent_conn.send((2, gen_src_n))
-          self.parent_conn.send((3, gen_tgt_n))
+          self.parent_conn.send((rel_name, src_name, macro.ADD_NODE, self.src_r_index))
+          self.parent_conn.send((rel_name, tgt_name, macro.ADD_NODE, self.tgt_r_index))
           p1 = [self.src_l_index, self.src_r_index]
           p2 = [self.tgt_l_index, self.tgt_r_index]
-          res = self.gen_data(p1, p2)
-          if res[0] == 1:
-            self.src_r_index += res[1]
-            self.src_l_index = src_r_index
-            self.tgt_r_index += res[2]
-            self.tgt_l_index = tgt_r_index
+          self.gen_data(p1, p2)
+          # res = self.gen_data(p1, p2)
+          # if res[0] == 1:
+          #   self.src_r_index += res[1]
+          #   self.src_l_index = src_r_index
+          #   self.tgt_r_index += res[2]
+          #   self.tgt_l_index = tgt_r_index
+        self.parent_conn.send((rel_name, src_name, macro.FINISH_NODE, self.src_r_index))
+        self.parent_conn.send((rel_name, tgt_name, macro.FINISH_NODE, self.tgt_r_index))
     except Exception as e:
       raise e
     finally:
@@ -347,7 +349,7 @@ class GenDDR(object):
       if flag == 0:
         self.src_fake_cnt -= lens
         self.tgt_fake_cnt -= lent
-        return (0, 0, 0)
+        # return (0, 0, 0)
       # compute out vector
       self.pwl_instance.set_nodes(self.src_fake_cnt)
       self.pwl_instance.dtmn_max_degree()
@@ -359,7 +361,7 @@ class GenDDR(object):
       if flag == 0:
         self.src_fake_cnt -= lens
         self.tgt_fake_cnt -= lent
-        return (0, 0, 0)
+        # return (0, 0, 0)
     else:
       # compute out vector
       self.pwl_instance.set_nodes(self.src_fake_cnt)
@@ -373,7 +375,7 @@ class GenDDR(object):
       if flag == 0:
         self.src_fake_cnt -= lens
         self.tgt_fake_cnt -= lent
-        return (0, 0, 0)
+        # return (0, 0, 0)
       # compute in vector
       self.pwl_instance.set_nodes(self.tgt_fake_cnt)
       self.pwl_instance.dtmn_max_degree()
@@ -385,14 +387,20 @@ class GenDDR(object):
       if flag == 0:
         self.src_fake_cnt -= lens
         self.tgt_fake_cnt -= lent
-        return (0, 0, 0)
+        # return (0, 0, 0)
     # TODO: send extra data to parent process
-    self.parent_conn.send((2, extra_out))
+    self.src_r_index += extra_out
+    self.src_l_index  = self.src_r_index
+    self.parent_conn.send((self.rel_dict['alias'], self.rel_dict['source'], macro.ADD_NODE, self.src_r_index))
     if self.tgt_dic != None:
-      self.parent_conn.send((3, extra_in))
+      self.tgt_r_index += extra_in
+      self.tgt_l_index  = self.tgt_r_index
+      self.parent_conn.send((self.rel_dict['alias'], self.rel_dict['target'], macro.ADD_NODE, self.tgt_r_index))
     else:
-      # TODO: correct ??
-      self.parent_conn.send((2, extra_in))
+      # TODO: correct ? 
+      self.src_r_index += extra_in
+      self.src_l_index  = self.src_r_index
+      self.parent_conn.send((self.rel_dict['alias'], self.rel_dict['source'], macro.ADD_NODE, self.src_r_index))
     # end ?
     # generate edges
     in_remain  = []
@@ -404,8 +412,8 @@ class GenDDR(object):
       if in_vector[i] != out_vector[i]:
         # src_id = self.rel_dict['source'] + str(out_vector[i])
         # tgt_id = self.rel_dict['target'] + str(in_vector[i])
-        src_id = str(out_vector[i])
-        tgt_id = str(in_vector[i])
+        src_id = out_vector[i]
+        tgt_id = in_vector[i]
         if (src_id, tgt_id) in rel_data:
           continue
         flg = self.add_edge_info(src_id, tgt_id, out_vector[i], in_vector[i])
@@ -424,8 +432,8 @@ class GenDDR(object):
         if out_remain[i] != in_remain[i]:
           # src_id = self.rel_dict['source'] + str(out_remain[i])
           # tgt_id = self.rel_dict['target'] + str(in_remain[i])
-          src_id = str(out_remain[i])
-          tgt_id = str(in_remain[i])
+          src_id = out_remain[i]
+          tgt_id = in_remain[i]
           if (src_id, tgt_id) in rel_data:
             continue
           flg = self.add_edge_info(src_id, tgt_id, out_remain[i], in_remain[i])
@@ -445,9 +453,8 @@ class GenDDR(object):
       self.db_handler.insert_many(sql, rel_data)
       print('[Gen relation %s]: done' % (self.rel_dict['alias']))
     elif self.mode == 'u-level': # send info to parent process
-      self.parent_conn.send((1, rel_data))
-      # send end
-    return (1, extra_out, extra_in)
+      self.parent_conn.send((self.rel_dict['alias'], '', macro.ADD_EDGE, rel_data))
+    # return (1, extra_out, extra_in)
 
   def homogeneous_with_uniform_comunity(self, out_vector, in_vector):
     last_old_node = self.src_r_index - 1
@@ -575,3 +582,5 @@ class GenDDR(object):
   
   def heterogeneous_with_uniform_comunity(self, out_vector, in_vector):
     # yi gou network, same size community
+    pass
+

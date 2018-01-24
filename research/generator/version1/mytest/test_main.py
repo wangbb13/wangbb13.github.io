@@ -7,7 +7,7 @@ from multiprocessing import Pipe, Value, Array, Process
 
 from model import tbl_sql, delete_sql, count_size, Store
 from gen import GenDDR, GenFE
-import config
+import mytest.config as config
 
 
 class TestMain(object):

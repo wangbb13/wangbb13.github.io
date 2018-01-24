@@ -104,7 +104,7 @@ zhihu_scheme = {
       'suspend': 0,
       'attr': [
         {'alias': 'title', 'value': {'type': str}},
-        {'alias': 'timestamp', 'value': {'type': datetime}},
+        {'alias': 'pose_time', 'value': {'type': datetime}},
         {'alias': 'class', 'value': {'type': str, 'range': ['game', 'sport', 'history', 'IT', 'work', 'culture', 'science', 'music', 'else']}}
       ],
       'stage': [
@@ -119,7 +119,7 @@ zhihu_scheme = {
       'suspend': 0,
       'attr': [
         {'alias': 'title', 'value': {'type': str}},
-        {'alias': 'timestamp', 'value': {'type': datetime}},
+        {'alias': 'create_time', 'value': {'type': datetime}},
         {'alias': 'class', 'value': {'type': str, 'range': ['game', 'sport', 'history', 'IT', 'work', 'culture', 'science', 'music', 'else']}}
       ],
       'stage': [
@@ -133,7 +133,7 @@ zhihu_scheme = {
       'suspend': 0,
       'attr': [
         {'alias': 'name', 'value': {'type': str}},
-        {'alias': 'timestamp', 'value': {'type': datetime}}
+        {'alias': 'create_time', 'value': {'type': datetime}}
       ],
       'stage': [
         {'type': 'gaussian', 'mu': 10, 'sigma': 2}
@@ -146,7 +146,7 @@ zhihu_scheme = {
       'suspend': 0,
       'attr': [
         {'alias': 'content', 'value': {'type': str}},
-        {'alias': 'timestamp', 'value': {'type': datetime}}
+        {'alias': 'share_time', 'value': {'type': datetime}}
       ],
       'stage': [
         {'type': 'gaussian', 'mu': 100, 'sigma': 2}
