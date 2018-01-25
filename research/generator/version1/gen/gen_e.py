@@ -3,7 +3,7 @@ import sys
 sys.path.append('../')
 import random
 from model import Store
-from gen import random_str
+from tools import random_str
 from datetime import datetime, timedelta
 
 separator = ','
@@ -12,9 +12,9 @@ def gen_data(ent, ent_size, start_index, n):
   rtn = [()] * n
   l = start_index
   r = l + n
-  if 'tag' in ent:
-    for i in range(l, r):
-      _id = i
+  for i in range(l, r):
+    recd = [i]
+    if 'tag' in ent:
       _tag = ''
       if ent['tag']['mode'] == 'random':
         n = random.randint(ent['tag']['count'][0], ent['tag']['count'][1])
@@ -54,13 +54,11 @@ def gen_data(ent, ent_size, start_index, n):
                 break
             tp_set.add(res)
             _tag = _tag + separator + t_ent + str(res)
-      rtn[i-l] = (_id, _tag)
-  if 'attr' in ent:
-    # TODO: how to generate reasonable random str ? 
-    # TODO: how to genreate reasonable timestamp ? 
-    # TODO: other types ? 
-    for i in range(l, r):
-      recd = [i]
+      recd.append(_tag)
+    if 'attr' in ent:
+      # TODO: how to generate reasonable random str ? 
+      # TODO: how to genreate reasonable timestamp ? 
+      # TODO: other types ? 
       for one_attr in ent['attr']:
         if 'range' in one_attr['value']:
           idx = random.randint(0, len(one_attr['value']['range']))
@@ -73,10 +71,7 @@ def gen_data(ent, ent_size, start_index, n):
             start_time = datetime.now() - timedelta(1, 0, 0)
             seconds = 24 * 60 * 60
             recd.append(random_str.random_time(start_time, seconds))
-      rtn[i-l] = tuple(recd)
-  else:
-    for i in range(l, r):
-      rtn[i-l] = (i, )
+    rtn[i-l] = tuple(recd)
   return rtn
 
 
@@ -84,15 +79,13 @@ class GenFE(object):
   '''
   generate fixed number entity
   '''
-  def __init__(self, ent, ent_size, db=None, child_conn=None):
+  def __init__(self, ent, ent_size, db):
     self.ent = ent
     self.ent_size = ent_size
     self.db  = db
-    self.conn = child_conn
     self.start_idx = 1
-    if db != None:
-      self.db_handler = Store(self.db)
-      self.db_handler.connect()
+    self.db_handler = Store(self.db)
+    self.db_handler.connect()
 
   def set_start_idx(self, n):
     self.start_idx = n
@@ -104,16 +97,17 @@ class GenFE(object):
       return 
     data = gen_data(self.ent, self.ent_size, self.start_idx, count)
     self.start_idx += count
-    # db first
-    if self.db != None:
-      name = self.ent['alias']
-      if 'tag' in self.ent:
-        sql = 'insert into %s values (?, ?)' % (name)
-      else:
-        sql = 'insert into %s values (?)' % (name)
+    # dump data to db
+    name = self.ent['alias']
+    sql = 'insert into %s values (?' % (name)
+    if 'tag' in self.ent:
+      sql = sql + ', ?'
+    if 'attr' in self.ent:
+      sql = sql + ', ?' * len(self.ent['attr'])
+    sql = sql + ')'
+    try:
       self.db_handler.insert_many(sql, data)
-    # conn second
-    else:
-      assert self.child_conn != None
-      self.child_conn.send(data)
+    except Exception as e:
+      raise e
+    print('[Node Generation]: Name %s, Max ID %s' % (name, max_id))
 

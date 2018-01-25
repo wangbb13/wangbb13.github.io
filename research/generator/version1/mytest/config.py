@@ -85,7 +85,7 @@ zhihu_scheme = {
     {
       'alias': 'user',
       'mode': 'dynamic',
-      'ceiling': float('inf'),
+      'ceiling': 100000,
       'suspend': 0,
       'attr': [
         {'alias': 'gender', 'value': {'type': str, 'range': ['male', 'female']}},
@@ -100,7 +100,7 @@ zhihu_scheme = {
     {
       'alias': 'question',
       'mode': 'dynamic',
-      'ceiling': float('inf'),
+      'ceiling': 200000,
       'suspend': 0,
       'attr': [
         {'alias': 'title', 'value': {'type': str}},
@@ -115,7 +115,7 @@ zhihu_scheme = {
     {
       'alias': 'article',
       'mode': 'dynamic',
-      'ceiling': float('inf'),
+      'ceiling': 60000,
       'suspend': 0,
       'attr': [
         {'alias': 'title', 'value': {'type': str}},
@@ -129,7 +129,7 @@ zhihu_scheme = {
     {
       'alias': 'column',
       'mode': 'dynamic',
-      'ceiling': float('inf'),
+      'ceiling': 10000,
       'suspend': 0,
       'attr': [
         {'alias': 'name', 'value': {'type': str}},

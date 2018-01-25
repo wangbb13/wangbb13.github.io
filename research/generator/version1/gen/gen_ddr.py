@@ -7,7 +7,7 @@ from model import Store
 from .gen_e import GenFE
 import random
 import math
-import gen.macro
+from tools import macro
 
 
 class GenDDR(object):
@@ -61,7 +61,7 @@ class GenDDR(object):
     self.src_r_index = 1 
     self.tgt_l_index = 0 
     self.tgt_r_index = 1 
-    self.src_fake_cnt = 0
+    self.src_fake_cnt = 0 
     self.tgt_fake_cnt = 0 
     # compress degree list, to accelerate
     self.step = 1 # TODO: config info, compress step
@@ -123,7 +123,7 @@ class GenDDR(object):
         src_stg_idx = 0
         tgt_stg_idx = 0
         # TODO: when should it stop 
-        while self.src_r_index < self.src_dic['ceiling'] and self.tgt_r_index < self.tgt_dic['ceiling']:
+        while self.src_r_index < self.src_dic['ceiling'] or self.tgt_r_index < self.tgt_dic['ceiling']:
           one_src_gen = self.src_dic['stage'][src_stg_idx]
           one_tgt_gen = self.tgt_dic['stage'][tgt_stg_idx]
           src_stg_idx = (src_stg_idx + 1) % src_stg_len
@@ -151,6 +151,7 @@ class GenDDR(object):
     except Exception as e:
       raise e
     finally:
+      self.parent_conn.send((rel_name, '', macro.FINISH_EDGE, ''))
       self.db_handler.close()
 
   def build_vector(self, a, b, mx_dgre, dlt_dgre, dgre_nodes):
@@ -451,7 +452,7 @@ class GenDDR(object):
       # TODO: correct ?
       sql = 'insert into %s values (?, ?)' % (self.rel_dict['alias'])
       self.db_handler.insert_many(sql, rel_data)
-      print('[Gen relation %s]: done' % (self.rel_dict['alias']))
+      print('[Edge Generation]: Name %s, Amount %s' % (self.rel_dict['alias'], len(rel_data)))
     elif self.mode == 'u-level': # send info to parent process
       self.parent_conn.send((self.rel_dict['alias'], '', macro.ADD_EDGE, rel_data))
     # return (1, extra_out, extra_in)

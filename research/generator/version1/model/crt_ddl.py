@@ -4,7 +4,7 @@ import os
 import sys
 sys.path.append('../')
 
-from gen import legal
+from tools import legal
 from datetime import datetime
 
 sql_tabl = 'create table %s ( \n%s \n); \n\n'
