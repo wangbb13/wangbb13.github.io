@@ -39,8 +39,7 @@ class GenDDR(object):
     self.db_handler  = Store(db)
     self.db_handler.connect()
     # parameters of distributions
-    # parameters of power law distribution: 1 and 2
-    if 
+    # parameters of power law distribution: 1 - 2
     self.convert = False
     if isinstance(dic['in']['lambd'], list):
       self.tau  = dic['out']['lambd']
