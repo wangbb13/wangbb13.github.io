@@ -83,7 +83,7 @@ class GenFE(object):
     self.ent = ent
     self.ent_size = ent_size
     self.db  = db
-    self.start_idx = 1
+    self.start_idx = 0 
     self.db_handler = Store(self.db)
     self.db_handler.connect()
 

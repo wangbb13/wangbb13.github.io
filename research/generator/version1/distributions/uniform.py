@@ -10,6 +10,10 @@ class Uniform(object):
     self.nodes = nodes
     self.minv = min_val
     self.maxv = max_val
+    self.name = 'uniform'
+
+  def get_name(self):
+    return self.name
 
   def get_max_degree(self):
     return self.maxv
@@ -17,16 +21,23 @@ class Uniform(object):
   def get_min_degree(self):
     return self.minv
 
-  def set_min_val(self, n):
+  def get_nodes(self):
+    return self.nodes
+
+  def set_min_degree(self, n):
     self.minv = n 
 
-  def set_max_val(self, n):
+  def set_max_degree(self, n):
     self.maxv = n 
 
   def set_nodes(self, n):
     self.nodes = n 
 
   def get_every_degree_count(self):
+    '''
+    return: rtn list
+      rtn[i] : the number of node with degree i
+    '''
     degree_num = self.maxv - self.minv + 1 
     rtn = [0] * degree_num
     mean = int(self.nodes / degree_num)

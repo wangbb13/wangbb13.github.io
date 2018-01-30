@@ -2,7 +2,7 @@
 import sys
 sys.path.append('../')
 
-from distributions import pwl, PWL
+from distributions import pwl, PWL, Uniform
 from model import Store
 from .gen_e import GenFE
 import random
@@ -16,15 +16,15 @@ class GenDDR(object):
   '''
   def __init__(self, db, dic, parent_conn, src_dic, ent_size, tgt_dic=None, mode='local'):
     '''
-    db: db name
-    dic    : the relation dict of the config
+    db  : db name
+    dic : the relation dict of the config
     parent_conn: server conn
                  1, rel data
                  2, src nodes: n
                  3, tgt nodes: m
-    src_dic: src node config dict
+    src_dic : src node config dict
     ent_size: the number of nodes of each entity
-    tgt_dic: tgt node config dict
+    tgt_dic : tgt node config dict
              if is None, then tgt_dic == src_dic, e.g. user -> user
     mode : local (default), dump edge locally
          : u-level, dump edge and node in parent process
@@ -38,26 +38,46 @@ class GenDDR(object):
     self.ent_size = ent_size
     self.db_handler  = Store(db)
     self.db_handler.connect()
-    # parameters of distributions
-    # parameters of power law distribution: 1 and 2
-    if 
-    self.convert = False
-    if isinstance(dic['in']['lambd'], list):
-      self.tau  = dic['out']['lambd']
-      self.tau1 = dic['in']['lambd'][0]
-      self.tau2 = dic['in']['lambd'][1]
-    else:
-      self.tau  = dic['in']['lambd']
-      self.tau1 = dic['out']['lambd'][0]
-      self.tau2 = dic['out']['lambd'][1]
-      self.convert = True
+    # parameters of in/out distributions
+    # TODO: other type of distribution
+    if dic['in']['type'] == 'power_law':
+      mind, maxd, midd = 0, -1, -1
+      if 'min_degree' in dic['in']:
+        mind = dic['in']['min_degree']
+      if 'max_degree' in dic['in']:
+        maxd = dic['in']['max_degree']
+      if 'mid_degree' in dic['in']:
+        midd = dic['in']['mid_degree']
+      if isinstance(dic['in']['lambd'], list):
+        self.indistr_ins = PWL(0, dic['in']['lambd'][0], dic['in']['lambd'][1], mind, maxd, midd)
+      else:
+        self.indistr_ins = PWL(0, dic['in']['lambd'], min_degree=mind, max_degree=maxd, mid_degree=midd)
+    elif dic['in']['type'] == 'uniform':
+      self.indistr_ins = Uniform(0, dic['in']['min'], dic['in']['max'])
+
+    if dic['out']['type'] == 'power_law':
+      mind, maxd, midd = 0, -1, -1
+      if 'min_degree' in dic['out']:
+        mind = dic['out']['min_degree']
+      if 'max_degree' in dic['out']:
+        maxd = dic['out']['max_degree']
+      if 'mid_degree' in dic['out']:
+        midd = dic['out']['mid_degree']
+      if isinstance(dic['out']['lambd'], list):
+        self.outdistr_ins = PWL(0, dic['out']['lambd'][0], dic['out']['lambd'][1], mind, maxd, midd)
+      else:
+        self.outdistr_ins = PWL(0, dic['out']['lambd'], min_degree=mind, max_degree=maxd, mid_degree=midd)
+    elif dic['out']['type'] = 'uniform':
+      self.outdistr_ins = Uniform(0, dic['out']['min'], dic['out']['max'])
     # some statistical info
     self.in_degree_nums  = []   # [i] : the number of nodes with in degree i
     self.out_degree_nums = []   # [i] : the number of nodes with out degree i 
     self.node_in_degree  = []   # [i] : the in degree of node i
     self.node_out_degree = []   # [i] : the out degree of node i
-    self.in_degree_nodes  = []  # [i] : the nodes with in degree i
-    self.out_degree_nodes = []  # [i] : the nodes with out degree i
+    self.in_degree_nodes  = []  # [i] : the nodes with in degree i, from degree 1
+    self.out_degree_nodes = []  # [i] : the nodes with out degree i,from degree 1
+    self.src_remain_nodes = []  # : source nodes (out) list with degree 0
+    self.tgt_remain_nodes = []  # : target nodes (in)  list with degree 0
     # generate index and nums info
     self.src_l_index = 0 
     self.src_r_index = 1 
@@ -65,16 +85,12 @@ class GenDDR(object):
     self.tgt_r_index = 1 
     self.src_fake_cnt = 0 
     self.tgt_fake_cnt = 0 
-    # compress degree list, to accelerate
-    self.step = 1 # TODO: config info, compress step
-    self.pwl_instance = PWL(0, self.tau, self.tau1, self.tau2)
-    
-    # for community
-    self.mu_parameter = 0.4 # used to determine community belongs
-    self.ncomunty = 10  # community id: 0, 1, ...
-    self.comunty_nodes = []   # community: set of nodes
+    # for community 
+    self.mu_parameter = 0.4 # used to determine community belongs 
+    self.ncomunty = 10      # community id: 0, 1, ... 
+    self.comunty_nodes = [] # community: set of nodes 
     # node id: start from 1
-    self.node_comunty_n_indegree = [[]]  # [d1, ..., dn]
+    self.node_comunty_n_indegree = [[]]  # [d1, ..., dn] 
     self.node_comunty_n_outdegree = [[]] # [d1, ..., dn]
     self.node_comunty_ident = [set()]    # the communities node i belongs to
     # self.node_comunty_in_ident = [-1]  # the community node i belongs to, in degree
@@ -126,11 +142,12 @@ class GenDDR(object):
         src_stg_idx = 0
         tgt_stg_idx = 0
         # TODO: when should it stop 
-        while self.src_r_index < self.src_dic['ceiling'] or self.tgt_r_index < self.tgt_dic['ceiling']:
+        # step 1
+        while self.src_r_index < self.src_dic['ceiling'] and self.tgt_r_index < self.tgt_dic['ceiling']:
           one_src_gen = self.src_dic['stage'][src_stg_idx]
           one_tgt_gen = self.tgt_dic['stage'][tgt_stg_idx]
           src_stg_idx = (src_stg_idx + 1) % src_stg_len
-          tgt_stg_idx = (src_stg_idx + 1) % tgt_stg_len
+          tgt_stg_idx = (tgt_stg_idx + 1) % tgt_stg_len
           gen_src_n = self.gen_node(one_src_gen)
           gen_tgt_n = self.gen_node(one_tgt_gen)
           # src_ent_gen.start(gen_src_n)
@@ -149,6 +166,24 @@ class GenDDR(object):
           #   self.src_l_index = src_r_index
           #   self.tgt_r_index += res[2]
           #   self.tgt_l_index = tgt_r_index
+        if self.src_r_index < self.src_dic['ceiling']:
+          one_src_gen = self.src_dic['stage'][src_stg_idx]
+          src_stg_idx = (src_stg_idx + 1) % src_stg_len
+          gen_src_n = self.gen_node(one_src_gen)
+          self.src_r_index += gen_src_n
+          self.parent_conn.send((rel_name, src_name, macro.ADD_NODE, self.src_r_index))
+          p1 = [self.src_l_index, self.src_r_index]
+          p2 = [self.tgt_l_index, self.tgt_r_index]
+          self.gen_data(p1, p2)
+        if self.tgt_r_index < self.tgt_dic['ceiling']:
+          one_tgt_gen = self.tgt_dic['stage'][tgt_stg_idx]
+          tgt_stg_idx = (tgt_stg_idx + 1) % tgt_stg_len
+          gen_tgt_n = self.gen_node(one_tgt_gen)
+          self.tgt_r_index += gen_tgt_n
+          self.parent_conn.send((rel_name, tgt_name, macro.ADD_NODE, self.tgt_r_index))
+          p1 = [self.src_l_index, self.src_r_index]
+          p2 = [self.tgt_l_index, self.tgt_r_index]
+          self.gen_data(p1, p2)
         self.parent_conn.send((rel_name, src_name, macro.FINISH_NODE, self.src_r_index))
         self.parent_conn.send((rel_name, tgt_name, macro.FINISH_NODE, self.tgt_r_index))
     except Exception as e:
@@ -157,12 +192,13 @@ class GenDDR(object):
       self.parent_conn.send((rel_name, '', macro.FINISH_EDGE, ''))
       self.db_handler.close()
 
-  def build_vector(self, a, b, mx_dgre, dlt_dgre, dgre_nodes):
+  def build_vector(self, a, b, mx_dgre, dlt_dgre, dgre_nodes, remain_nodes):
     '''
     a, b     : generate interval [a, b)
     mx_dgre  : max degree
     dlt_dgre : delta_in_degree or delta_out_degree
     dgre_nodes: in_degree_nodes or out_degree_nodes
+    remain_nodes: src_remain_nodes or tgt_remain_nodes
     return: (0/1, extra_nodes, rtn_vector)
             0: do not need to add edges, 1: in contrast
     '''
@@ -177,23 +213,23 @@ class GenDDR(object):
     if minus > (len(dlt_dgre) / 3): # TODO: set parameter
       return (0, extra_nodes, [])
     # compute new node
-    end_i = b
-    new = [i for i in range(a, b)]
+    end_i = max(b, max(remain_nodes)+1)
+    new = remain_nodes + [i for i in range(a, b)]
     random.shuffle(new)
     # compute compress degree list
-    cmprs_dgre = []
-    ii = 0
-    for i in range(int(math.floor(mx_dgre / self.step))):
-      s = 0
-      for j in range(i*self.step, i*self.step + self.step):
-        s += dlt_dgre[j]
-      cmprs_dgre.append(s)
-      ii = i
-    s = 0
-    for j in range(ii*self.step + self.step, mx_dgre):
-      s += dlt_dgre[j]
-    if s != 0:
-      cmprs_dgre.append(s)
+    cmprs_dgre = dlt_dgre[:]
+    # ii = 0
+    # for i in range(int(math.floor(mx_dgre / self.step))):
+    #   s = 0
+    #   for j in range(i*self.step, i*self.step + self.step):
+    #     s += dlt_dgre[j]
+    #   cmprs_dgre.append(s)
+    #   ii = i
+    # s = 0
+    # for j in range(ii*self.step + self.step, mx_dgre):
+    #   s += dlt_dgre[j]
+    # if s != 0:
+    #   cmprs_dgre.append(s)
     # compute rtn vector
     rtn_vector = []
     if len(dgre_nodes) == 0:
@@ -203,6 +239,9 @@ class GenDDR(object):
         rtn_vector += [x for x in new[index:index+num] for j in range(repeat)]
         index += num
         repeat += 1
+      # new strategy
+      remain_nodes.clear()
+      remain_nodes.extend(new[index:])
     else:
       len_comp  = len(cmprs_dgre)
       len_inot  = len(dgre_nodes)
@@ -227,19 +266,19 @@ class GenDDR(object):
         end_i += more
         # select nodes from new nodes
         new_i = 0
-        rtn_vector += new[new_i:new_i + cmprs_dgre[0]] * self.step
+        rtn_vector += new[new_i:new_i + cmprs_dgre[0]]
         new_i += cmprs_dgre[0]
         # select nodes from existing nodes
         j = 0
         for i in range(1, len(cmprs_dgre)):
           comp_size = cmprs_dgre[i] - len(dgre_nodes[j])
-          rtn_vector += dgre_nodes[j][:cmprs_dgre[i]] * self.step
+          rtn_vector += dgre_nodes[j][:cmprs_dgre[i]] 
           if comp_size > 0:
             more = max(comp_size - (end_i - new_i), 0)
             new += [i for i in range(end_i, end_i + more)]
             extra_nodes += more
             end_i += more
-            rtn_vector += new[new_i:new_i + comp_size] * (self.step * (i+1))
+            rtn_vector += new[new_i:new_i + comp_size] * (i+1)
             new_i += comp_size
           j += 1
       else:
@@ -250,78 +289,76 @@ class GenDDR(object):
         # 
         new_i = 0
         for i in range(delta_len):
-          rtn_vector += new[new_i:new_i + cmprs_dgre[i]] * (self.step * (i + 1))
+          rtn_vector += new[new_i:new_i + cmprs_dgre[i]] * (i + 1)
           new_i += cmprs_dgre[i]
         # 
         j = 0
         for i in range(delta_len, len(cmprs_dgre)):
           comp_size = cmprs_dgre[i] - len(dgre_nodes[j])
-          rtn_vector += dgre_nodes[j][:cmprs_dgre[i]] * (self.step * delta_len)
+          rtn_vector += dgre_nodes[j][:cmprs_dgre[i]] * delta_len
           if comp_size > 0:
             more = max(comp_size - (end_i - new_i), 0)
             new += [i for i in range(end_i, end_i + more)]
             extra_nodes += more
             end_i += more
-            rtn_vector += new[new_i:new_i + comp_size] * (self.step * (i + 1))
+            rtn_vector += new[new_i:new_i + comp_size] * (i + 1)
             new_i += comp_size
           j += 1
+      # new strategy
+      remain_nodes.clear()
+      remain_nodes.extend(new[new_i:])
     return (1, extra_nodes, rtn_vector)
 
   def add_edge_info(self, src_id, tgt_id, out_i, in_i):
-    sql = 'select * from %s where src_id = %s and tgt_id = %s' % (self.rel_dict['alias'], src_id, tgt_id)
+    sql = 'select count(*) from %s where src_id = %s and tgt_id = %s' % (self.rel_dict['alias'], src_id, tgt_id)
     res = self.db_handler.query(sql)
-    if len(res) == 0:
+    if res[0][0] == 0:
       # deal with sth about out degree
       for i in range(len(self.node_out_degree), out_i + 1):
         self.node_out_degree.append(0)
       self.node_out_degree[out_i] += 1
       degreei = self.node_out_degree[out_i]
-      ind  = int(degreei / self.step)
-      ind_ = int((degreei - 1) / self.step)
-      if self.step == 1:
-        ind  -= 1
-        ind_ -= 1
+      ind  = int(degreei) - 1
+      ind_ = int(degreei - 1) - 1
       for i in range(len(self.out_degree_nodes), ind + 1):
         self.out_degree_nodes.append([])
         self.out_degree_nums.append(0)
       if degreei == 1:
         self.out_degree_nodes[0].append(out_i)
         self.out_degree_nums[0] += 1
-      elif degreei % self.step == 0:
-        try:
-          self.out_degree_nodes[ind_].remove(out_i)
-          self.out_degree_nums[ind_] -= 1
-        except Exception as e:
-          pass
-        self.out_degree_nodes[ind].append(out_i)
-        self.out_degree_nums[ind] += 1
+      try:
+        self.out_degree_nodes[ind_].remove(out_i)
+        self.out_degree_nums[ind_] -= 1
+      except Exception as e:
+        pass
+      self.out_degree_nodes[ind].append(out_i)
+      self.out_degree_nums[ind] += 1
       # deal with sth about in degree
       for i in range(len(self.node_in_degree), in_i + 1):
         self.node_in_degree.append(0)
       self.node_in_degree[in_i] += 1
       degreei = self.node_in_degree[in_i]
-      ind  = int(degreei / self.step)
-      ind_ = int((degreei - 1) / self.step)
-      if self.step == 1:
-        ind  -= 1
-        ind_ -= 1
+      ind  = int(degreei) - 1
+      ind_ = int(degreei - 1) - 1
       for i in range(len(self.in_degree_nodes), ind + 1):
         self.in_degree_nodes.append([])
         self.in_degree_nums.append(0)
       if degreei == 1:
         self.in_degree_nodes[0].append(in_i)
         self.in_degree_nums[0] += 1
-      elif degreei % self.step == 0:
-        try:
-          self.in_degree_nodes[ind_].remove(in_i)
-          self.in_degree_nums[ind_] -= 1
-        except Exception as e:
-          pass
-        self.in_degree_nodes[ind].append(in_i)
-        self.in_degree_nums[ind] += 1
+      try:
+        self.in_degree_nodes[ind_].remove(in_i)
+        self.in_degree_nums[ind_] -= 1
+      except Exception as e:
+        pass
+      self.in_degree_nodes[ind].append(in_i)
+      self.in_degree_nums[ind] += 1
       return 1
     else:
       return 0
+
+  def is_exceptional_case(self, distr_ins):
+    return distr_ins.get_name() == 'power_law' and distr_ins.get_lambd1() != -1 and distr_ins.get_mid_degree() == -1 and distr_ins.get_max_degree() = -1
 
   def gen_data(self, src_nodes, tgt_nodes):
     '''
@@ -340,62 +377,128 @@ class GenDDR(object):
     self.src_fake_cnt += lens
     self.tgt_fake_cnt += lent
     rel_data = []
-    if self.convert:
-      # compute in vector
-      self.pwl_instance.set_nodes(self.tgt_fake_cnt)
-      self.pwl_instance.dtmn_max_degree()
-      max_in_degree = self.pwl_instance.max_d1
-      cur_in_degree = pwl.get_node_count(self.tgt_fake_cnt, max_in_degree, self.tau)
-      delta = max_in_degree - len(self.in_degree_nums)
-      last_in_degree = self.in_degree_nums[:] + [0] * delta
-      delta_in_degree = [cur_in_degree[i] - last_in_degree[i] for i in range(len(cur_in_degree))]
-      (flag, extra_in, in_vector) = self.build_vector(tgt_nodes[0], tgt_nodes[1], max_in_degree, delta_in_degree, self.in_degree_nodes)
-      if flag == 0:
-        self.src_fake_cnt -= lens
-        self.tgt_fake_cnt -= lent
-        return 
-        # return (0, 0, 0)
+    # deal with different cases
+    if self.is_exceptional_case(self.indistr_ins):
       # compute out vector
-      self.pwl_instance.set_nodes(self.src_fake_cnt)
-      self.pwl_instance.dtmn_max_degree()
-      maxk1, maxk2, cur_out_degree = self.pwl_instance.dtmn_max_degree_2()
-      delta = len(cur_out_degree) - len(self.out_degree_nums)
-      last_out_degree = self.out_degree_nums[:] + [0] * delta
-      delta_out_degree = [cur_out_degree[i] - last_out_degree[i] for i in range(len(cur_out_degree))]
-      (flag, extra_out, out_vector) = self.build_vector(src_nodes[0], src_nodes[1], maxk2, delta_out_degree, self.out_degree_nodes)
-      if flag == 0:
-        self.src_fake_cnt -= lens
-        self.tgt_fake_cnt -= lent
-        return 
-        # return (0, 0, 0)
-    else:
-      # compute out vector
-      self.pwl_instance.set_nodes(self.src_fake_cnt)
-      self.pwl_instance.dtmn_max_degree()
-      max_out_degree = self.pwl_instance.max_d1
-      cur_out_degree = pwl.get_node_count(self.src_fake_cnt, max_out_degree, self.tau)
+      self.outdistr_ins.set_nodes(self.src_fake_cnt)
+      max_out_degree = self.outdistr_ins.get_max_degree()
+      min_out_degree = self.outdistr_ins.get_min_degree()
+      if max_out_degree == -1:
+        max_out_degree = self.outdistr_ins.dtmn_max_degree()
+        cur_out_degree = self.outdistr_ins.get_node_count(self.src_fake_cnt, self.outdistr_ins.get_lambd(), self.outdistr_ins.get_min_degree(), self.outdistr_ins.get_max_degree())
+      else:
+        cur_out_degree = self.outdistr_ins.get_every_degree_count()
+      if min_out_degree == 0:
+        cur_out_degree.pop(0)
+      elif min_out_degree > 1:
+        cur_out_degree = [0] * (min_out_degree - 1) + cur_out_degree
       delta = max_out_degree - len(self.out_degree_nums)
       last_out_degree = self.out_degree_nums[:] + [0] * delta
       delta_out_degree = [cur_out_degree[i] - last_out_degree[i] for i in range(len(cur_out_degree))]
-      (flag, extra_out, out_vector) = self.build_vector(src_nodes[0], src_nodes[1], max_out_degree, delta_out_degree, self.out_degree_nodes)
+      flag, extra_out, out_vector = self.build_vector(src_nodes[0], src_nodes[1], max_out_degree, delta_out_degree, self.out_degree_nodes, self.src_remain_nodes)
       if flag == 0:
         self.src_fake_cnt -= lens
         self.tgt_fake_cnt -= lent
-        return 
-        # return (0, 0, 0)
+        return
       # compute in vector
-      self.pwl_instance.set_nodes(self.tgt_fake_cnt)
-      self.pwl_instance.dtmn_max_degree()
-      maxk1, maxk2, cur_in_degree = self.pwl_instance.dtmn_max_degree_2()
+      self.indistr_ins.set_nodes(self.tgt_fake_cnt)
+      tot_degree = 0
+      for _i in range(max_out_degree):
+        tot_degree += (_i + 1) * cur_out_degree[_i]
+      maxk1, maxk2, cur_in_degree = self.indistr_ins.dtmn_max_degree_2(tot_degree)
       delta = len(cur_in_degree) - len(self.in_degree_nums)
       last_in_degree = self.in_degree_nums[:] + [0] * delta
       delta_in_degree = [cur_in_degree[i] - last_in_degree[i] for i in range(len(cur_in_degree))]
-      (flag, extra_in, in_vector) = self.build_vector(tgt_nodes[0], tgt_nodes[1], maxk2, delta_in_degree, self.in_degree_nodes)
+      flag, extra_in, in_vector = self.build_vector(tgt_nodes[0], tgt_nodes[1], maxk2, delta_in_degree, self.in_degree_nodes, self.tgt_remain_nodes)
       if flag == 0:
         self.src_fake_cnt -= lens
         self.tgt_fake_cnt -= lent
         return 
-        # return (0, 0, 0)
+    elif self.is_exceptional_case(self.outdistr_ins):
+      # compute in vector
+      self.indistr_ins.set_nodes(self.tgt_fake_cnt)
+      min_in_degree = self.indistr_ins.get_min_degree()
+      max_in_degree = self.indistr_ins.get_max_degree()
+      if max_in_degree == -1:
+        max_in_degree = self.indistr_ins.dtmn_max_degree()
+        cur_in_degree = self.indistr_ins.get_node_count(self.tgt_fake_cnt, self.indistr_ins.get_lambd(), self.indistr_ins.get_min_degree(), self.indistr_ins.get_max_degree())
+      else:
+        cur_in_degree = self.indistr_ins.get_every_degree_count()
+      if min_in_degree == 0:
+        cur_in_degree.pop(0)
+      elif min_in_degree > 1:
+        cur_in_degree = [0] * (min_in_degree - 1) + cur_in_degree
+      delta = max_in_degree - len(self.in_degree_nums)
+      last_in_degree = self.in_degree_nums[:] + [0] * delta
+      delta_in_degree = [cur_in_degree[i] - last_in_degree[i] for i in range(len(cur_in_degree))]
+      flag, extra_in, in_vector = self.build_vector(tgt_nodes[0], tgt_nodes[1], max_in_degree, delta_in_degree, self.in_degree_nodes, self.tgt_remain_nodes)
+      if flag == 0:
+        self.src_fake_cnt -= lens 
+        self.tgt_fake_cnt -= lent 
+        return
+      # compute out vector
+      self.outdistr_ins.set_nodes(self.src_fake_cnt)
+      tot_degree = 0
+      for _i in range(max_in_degree):
+        tot_degree += (_i + 1) * cur_in_degree[_i]
+      maxk1, maxk2, cur_out_degree = self.outdistr_ins.dtmn_max_degree_2(tot_degree)
+      delta = len(cur_out_degree) - len(self.out_degree_nums)
+      last_out_degree = self.out_degree_nums[:] + [0] * delta
+      delta_out_degree = [cur_out_degree[i] - last_out_degree[i] for i in range(len(cur_out_degree))]
+      flag, extra_out, out_vector = self.build_vector(src_nodes[0], src_nodes[1], maxk2, delta_out_degree, self.out_degree_nodes, self.src_remain_nodes)
+      if flag == 0:
+        self.src_fake_cnt -= lens
+        self.tgt_fake_cnt -= lent
+        return 
+    else:
+      # compute in vector
+      self.indistr_ins.set_nodes(self.tgt_fake_cnt)
+      min_in_degree = self.indistr_ins.get_min_degree()
+      max_in_degree = self.indistr_ins.get_max_degree()
+      if max_in_degree == -1:
+        max_in_degree = self.indistr_ins.dtmn_max_degree()
+        cur_in_degree = self.indistr_ins.get_node_count(self.tgt_fake_cnt, self.indistr_ins.get_lambd(), self.indistr_ins.get_min_degree(), self.indistr_ins.get_max_degree())
+      else:
+        if self.indistr_ins.get_name() == 'power_law' and self.indistr_ins.get_lambd1() != -1:
+          cur_in_degree = self.indistr_ins.get_every_degree_count_two_stage()
+        else:
+          cur_in_degree = self.indistr_ins.get_every_degree_count()
+      if min_in_degree == 0:
+        cur_in_degree.pop(0)
+      elif min_in_degree > 1:
+        cur_in_degree = [0] * (min_in_degree - 1) + cur_in_degree
+      delta = max_in_degree - len(self.in_degree_nums)
+      last_in_degree = self.in_degree_nums[:] + [0] * delta
+      delta_in_degree = [cur_in_degree[i] - last_in_degree[i] for i in range(len(cur_in_degree))]
+      flag, extra_in, in_vector = self.build_vector(tgt_nodes[0], tgt_nodes[1], max_in_degree, delta_in_degree, self.in_degree_nodes, self.tgt_remain_nodes)
+      if flag == 0:
+        self.src_fake_cnt -= lens 
+        self.tgt_fake_cnt -= lent 
+        return 
+      # compute out vector
+      self.outdistr_ins.set_nodes(self.src_fake_cnt)
+      min_out_degree = self.outdistr_ins.get_min_degree()
+      max_out_degree = self.outdistr_ins.get_max_degree()
+      if max_out_degree == -1:
+        max_out_degree = self.outdistr_ins.dtmn_max_degree()
+        cur_out_degree = self.outdistr_ins.get_node_count(self.src_fake_cnt, self.outdistr_ins.get_lambd(), self.outdistr_ins.get_min_degree(), self.outdistr_ins.get_max_degree())
+      else:
+        if self.outdistr_ins.get_name() == 'power_law' and self.outdistr_ins.get_lambd1() != -1:
+          cur_out_degree = self.outdistr_ins.get_every_degree_count_two_stage()
+        else:
+          cur_out_degree = self.outdistr_ins.get_every_degree_count()
+      if min_out_degree == 0:
+        cur_out_degree.pop(0)
+      elif min_out_degree > 1:
+        cur_out_degree = [0] * (min_out_degree - 1) + cur_out_degree
+      delta = max_out_degree - len(self.out_degree_nums)
+      last_out_degree = self.out_degree_nums +  [0] * delta
+      delta_out_degree = [cur_out_degree[i] - last_out_degree[i] for i in range(len(cur_out_degree))]
+      flag, extra_out, out_vector = self.build_vector(src_nodes[0], src_nodes[1], max_out_degree, delta_out_degree, self.out_degree_nodes, self.src_remain_nodes)
+      if flag == 0:
+        self.src_fake_cnt -= lens
+        self.tgt_fake_cnt -= lent 
+        return
     # TODO: send extra data to parent process
     self.src_r_index += extra_out
     self.src_l_index  = self.src_r_index
