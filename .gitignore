@@ -10,5 +10,6 @@
 *.docx
 *.exe
 *.pdf
+research/
 research/generator/app/
 research/generator/version0/

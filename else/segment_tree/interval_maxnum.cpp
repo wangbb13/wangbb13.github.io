@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <random>
 using namespace std;
 
 const int MAXN = 200005;
@@ -62,3 +63,11 @@ int main() {
   }
   return 0;
 }
+
+// int func() {
+// 	std::default_random_engine generator;
+// 	std::uniform_int_distribution<int> distribution(0, 100);
+// 	auto dice = std::bind(distribution, generator);
+// 	cout << dice() << endl;
+//   cout << "**/" << endl;
+// }
