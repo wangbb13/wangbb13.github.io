@@ -8,8 +8,8 @@ TASK: []
 using namespace std;
 
 int main() {
-  ofstream fout("[].out");
-  ifstream fin("[].in");
-  
-  return 0;
+    ofstream fout("[].out");
+    ifstream fin("[].in");
+    
+    return 0;
 }

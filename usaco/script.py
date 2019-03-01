@@ -15,7 +15,8 @@ if __name__ == '__main__':
     with open('template.cpp', 'r') as f:
       string = f.read()
     with open('%s.cpp'%(name), 'w') as f:
-      f.write(string.replace('[]', name))
+      filename = os.path.basename(name)
+      f.write(string.replace('[]', filename))
     # os.system('cp template.cpp %s.cpp' % (name))
     os.system('touch %s.in %s.out' % (name, name))
     os.system('subl -a %s.cpp %s.in %s.out' % (name, name, name))

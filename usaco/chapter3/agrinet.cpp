@@ -8,7 +8,7 @@ TASK: agrinet
 #include <algorithm>
 using namespace std;
 
-struct tuple {
+struct my_tuple {
   int i, j, w;
 } T[5100];
 
@@ -31,7 +31,7 @@ void merge(int x, int y) {
   }
 }
 
-bool cmp(tuple a, tuple b) {
+bool cmp(my_tuple a, my_tuple b) {
   return a.w < b.w;
 }
 
