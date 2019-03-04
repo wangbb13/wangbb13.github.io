@@ -22,7 +22,7 @@ if __name__ == '__main__':
     os.system('subl -a %s.cpp %s.in %s.out' % (name, name, name))
     print('create successfully.')
   elif cmd == 'd':
-    os.system('rm %s.in %s.out %s' % (name, name, name))
+    os.system('rm %s.in %s.out %s.exe' % (name, name, name))
     print('delete successfully.')
   else:
     print('unkonwn command.')

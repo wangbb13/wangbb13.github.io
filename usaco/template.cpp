@@ -11,5 +11,7 @@ int main() {
     ofstream fout("[].out");
     ifstream fin("[].in");
     
+	fin.close();
+	fout.close();
     return 0;
 }
