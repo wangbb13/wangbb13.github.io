@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
-import java.math.BigDecimal;
-import java.util.ArrayList;
+// import java.math.BigDecimal;
+// import java.util.ArrayList;
 
 public class Distribution {
     private long minDegree;
@@ -135,7 +135,6 @@ public class Distribution {
     public void mathEdges() {
         // adjust maxDegree so that the number of nodes 
         // whose degree is maxDegree is equal to or more than 1
-        maxDegree = Math.min(maxDegree, numNodes);
         long binL = maxDegree + 1;
         long binR = maxDegree;
         while (binR > 0 && numberOfMaxDegree() < 1) {
@@ -293,10 +292,8 @@ public class Distribution {
         iIndex[0] = -1;
         for (int i = 1; i <= degreeRange; ++i) {
             long num = (long)Math.ceil(temp[i - 1]);
-            // iIndex[i] = iIndex[i - 1] + num;
-            // iCdf[i] = iCdf[i - 1] + num * (i - 1 + minDegree);
-            iIndex[i] = num;
-            iCdf[i] = num * (i - 1 + minDegree);
+            iIndex[i] = iIndex[i - 1] + num;
+            iCdf[i] = iCdf[i - 1] + num * (i - 1 + minDegree);
         }
         // System.out.println("iCdf[1] = " + String.valueOf(temp[0]));
         // iCdf[0] = minDegree / iCdf[size];
@@ -306,26 +303,16 @@ public class Distribution {
         iIndex[size] = numNodes - 1;
         // end build CDF and ID list
         iMinGap = 1.0;
-        // int memI = -1;
         for (int i = 1; i <= degreeRange; ++i) {
             iCdf[i] /= iCdf[size];
-            // if (iCdf[i] - iCdf[i - 1] < iMinGap) {
-            //     iMinGap = iCdf[i] - iCdf[i - 1];
-            //     memI = i;
-            // }
             iMinGap = Math.min(iMinGap, iCdf[i] - iCdf[i - 1]);
         }
         // build hash tables
         // for (int i = 0; i <= degreeRange; ++i) {
         //     System.out.print(String.valueOf(iCdf[i]) + " ");
         // }
-        // System.out.println(memI);
-        // System.out.println(iCdf[memI]);
-        // System.out.println(iCdf[memI - 1]);
-        System.out.println("iMinGap = " + String.valueOf(iMinGap));
-        // iMinGap = Math.max(iMinGap, 4.761904761904762e-10);
+        // System.out.println("iMinGap = " + String.valueOf(iMinGap));
         int length = (int)Math.ceil(1.0 / iMinGap) + 1;
-        System.out.println(length);
         idHashTID = new long[length];
         idHashCDF = new double[length];
         idHashRatio = new double[length];

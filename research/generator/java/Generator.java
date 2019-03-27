@@ -9,18 +9,20 @@ import java.util.HashSet;
 
 public class Generator {
     public void genPWL(String[] args) {
-        if (args.length != 10) {
-            System.out.println("usage: ./main ilambda idmin idmax olambda odmin odmax nodes edges filename");
+        // System.out.println(args.length);
+        if (args.length != 9) {
+            System.out.println("usage: java Generator ilambda idmin idmax olambda odmin odmax nodes edges filename");
+            return;
         }
-        double iLambda = Double.parseDouble(args[1]);
-        long idMin = Long.parseLong(args[2]);
-        long idMax = Long.parseLong(args[3]);
-        double oLambda = Double.parseDouble(args[4]);
-        long odMin = Long.parseLong(args[5]);
-        long odMax = Long.parseLong(args[6]);
-        long nNodes = Long.parseLong(args[7]);
-        long nEdges = Long.parseLong(args[8]);
-        String filename = args[9];
+        double iLambda = Double.parseDouble(args[0]);
+        long idMin = Long.parseLong(args[1]);
+        long idMax = Long.parseLong(args[2]);
+        double oLambda = Double.parseDouble(args[3]);
+        long odMin = Long.parseLong(args[4]);
+        long odMax = Long.parseLong(args[5]);
+        long nNodes = Long.parseLong(args[6]);
+        long nEdges = Long.parseLong(args[7]);
+        String filename = args[8];
         
         Map<String, Double> iTheta = new HashMap<String, Double>();
         iTheta.put("lambda", iLambda);
@@ -35,19 +37,24 @@ public class Generator {
         // oPL.setOutBucket(100);
 
         // generation
+        long actualEdges = 0;
         Store store = new Store(filename);
         Set<Long> adj = new HashSet<Long>();
         for (long i = 0; i < nNodes; ++i) {
             long outDegree = oPL.genOutDegree(i);
-            for (long j = 0; j < outDegree; ++j) {
+            while (adj.size() < outDegree) {
                 long t = iPL.genTargetID();
+                // System.out.println(String.valueOf(t) + " ");
                 adj.add(t);
             }
+            actualEdges += adj.size();
             store.writeln(i, adj);
             adj.clear();
         }
         store.close();
         // end
+        System.out.println("actual number of edges = " + String.valueOf(actualEdges));
+        System.out.println("expected number of edges = " + String.valueOf(nEdges));
     }
 
     public static void main(String[] args) {

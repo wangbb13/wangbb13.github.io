@@ -23,16 +23,12 @@ public class Store {
 
     public void writeln(long i, Set<Long> adj) {
         if (!adj.isEmpty()) {
-            try {
-                pw.print(i);
-                for (Long n : adj) {
-                    pw.print(" ");
-                    pw.print(n);
-                }
-                pw.println();
-            } catch (IOException e) {
-                e.printStackTrace();
+            pw.print(i);
+            for (Long n : adj) {
+                pw.print(" ");
+                pw.print(n);
             }
+            pw.println();
         }
     }
 

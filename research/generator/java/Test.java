@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.ArrayList;
 
 public class Test {
     void testRound() {
@@ -78,10 +79,39 @@ public class Test {
             System.out.println(i);
     }
 
+    void testIntLong() {
+        long a = 10000;
+        int b = (int)a;
+        System.out.println(b);
+    }
+
+    void testArrayList() {
+        long [][] list = new long[10][];
+        System.out.println(list.length);
+        for (int i = 0; i < 10; ++i) {
+            list[i] = new long[i+1];
+            System.out.println(list[i].length);
+        }
+    }
+
+    void testMyUtil() {
+        int n = 10000;
+        int m = 10000;
+        int k = 10;
+        double lambda = 1.15;
+        int[][] ans = Utility.splitCommunity(n, m, k, lambda);
+        for (int i = 0; i < ans.length; ++i) {
+            System.out.println(String.valueOf(ans[i][0]) + " " + String.valueOf(ans[i][1]));
+        }
+    }
+
     public static void main(String[] args) {
         Test t = new Test();
         // t.misc();
         // t.testIO();
-        t.testSet();
+        // t.testSet();
+        // t.testIntLong();
+        // t.testArrayList();
+        t.testMyUtil();
     }
 }

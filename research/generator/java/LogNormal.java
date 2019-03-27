@@ -14,8 +14,8 @@ public class LogNormal extends Distribution {
 
     @Override
     public double pdf(long x) {
-        double mu = params.get("mu");
-        double sigma = params.get("sigma");
+        double mu = theta.get("mu");
+        double sigma = theta.get("sigma");
         double a = (Math.log(x + 0.1) - mu) / sigma;
         double b = (Math.log(x - 0.1) - mu) / sigma;
         return Utility.normCdf(a) - Utility.normCdf(b);
