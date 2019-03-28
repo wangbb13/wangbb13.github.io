@@ -15,6 +15,6 @@ public class PowerLaw extends Distribution {
 
     @Override
     public double pdf(long x) {
-        return Math.pow(theta.get("lambda"), x * 1.0);
+        return Math.pow(x * 1.0, theta.get("lambda"));
     }
 }

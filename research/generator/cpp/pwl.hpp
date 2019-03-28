@@ -50,7 +50,7 @@ public:
 };
 
 NGPowerLow::NGPowerLow(double _lambda, int _dmin, int _dmax, int _nodes, ullint _edges) {
-    lambda = _lambda;
+    lambda = -abs(_lambda);
     dmin = _dmin;
     dmax = _dmax;
     nodes = _nodes;
@@ -90,6 +90,7 @@ int NGPowerLow::number_of_dmax() {
 }
 
 ullint NGPowerLow::current_edges() {
+    // TODO: some problems
     double __sum = 0.0, __zip = 0.0, __t;
     for (int i = dmin; i <= dmax; ++ i) {
         __t = pow(i * 1.0, lambda);
