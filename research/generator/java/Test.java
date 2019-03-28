@@ -9,6 +9,43 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
 
+class One extends Thread {
+    private static int count = 0;
+    private Thread t;
+    private long start;
+
+    public One(long n) {
+        start = n;
+    }
+
+    public void run() {
+        for (int i = 0; i < 10; ++i) {
+            synchronized (One.class) {
+                count++;
+                if (count == 100) {
+                    long end = System.nanoTime();
+                    long totalTime = end - start;
+                    System.out.println("Total running time: ");
+                    System.out.println(String.valueOf(totalTime) + " ns.");
+                    double sec = totalTime * 1.0 / 1e9;
+                    System.out.println(String.valueOf(sec) + " s.");
+                }
+            }
+        }
+    }
+
+    public int get() {
+        return count;
+    }
+
+    public void start() {
+        if (t == null) {
+            t = new Thread(this, "A");
+            t.start();
+        }
+    }
+}
+
 public class Test {
     void testRound() {
         long num = 10;
@@ -105,6 +142,35 @@ public class Test {
         }
     }
 
+    void testMT() {
+        long start = System.nanoTime();
+        int n = 10;
+        One[] ts = new One[n];
+        for (int i = 0; i < n; ++i) {
+            ts[i] = new One(start);
+            ts[i].start();
+        }
+        // for (int i = 0; i < n; ++i) {
+        //     try {
+        //         ts[i].join();
+        //     } catch (InterruptedException e) {
+
+        //     }
+        // }
+    }
+
+    void testRV() {
+        long start = System.nanoTime();
+        Random rand = new Random();
+        for (long i = 0; i < 1e12; ++i) {
+            double a = rand.nextDouble();
+            // double b = a * a;
+        }
+        long end = System.nanoTime();
+        long total = end - start;
+        System.out.println(total * 1.0 / 1e9);
+    }
+
     public static void main(String[] args) {
         Test t = new Test();
         // t.misc();
@@ -112,6 +178,8 @@ public class Test {
         // t.testSet();
         // t.testIntLong();
         // t.testArrayList();
-        t.testMyUtil();
+        // t.testMyUtil();
+        // t.testMT();
+        t.testRV();
     }
 }

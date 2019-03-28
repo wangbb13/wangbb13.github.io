@@ -38,7 +38,7 @@ public class Generator {
 
         // generation
         long actualEdges = 0;
-        Store store = new Store(filename);
+        // Store store = new Store(filename);
         Set<Long> adj = new HashSet<Long>();
         for (long i = 0; i < nNodes; ++i) {
             long outDegree = oPL.genOutDegree(i);
@@ -48,10 +48,10 @@ public class Generator {
                 adj.add(t);
             }
             actualEdges += adj.size();
-            store.writeln(i, adj);
+            // store.writeln(i, adj);
             adj.clear();
         }
-        store.close();
+        // store.close();
         // end
         System.out.println("actual number of edges = " + String.valueOf(actualEdges));
         System.out.println("expected number of edges = " + String.valueOf(nEdges));

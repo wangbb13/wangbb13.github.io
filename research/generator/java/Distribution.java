@@ -65,8 +65,8 @@ public class Distribution {
         if (params.containsKey("lambda")) {
             double l = -Math.abs(params.get("lambda"));
             params.put("lambda", l);
-            System.out.print("Constructor: ");
-            System.out.println(params.get("lambda"));
+            // System.out.print("Constructor: ");
+            // System.out.println(params.get("lambda"));
         }
         // End
         for (Map.Entry<String, Double> entry : params.entrySet()) {
@@ -354,10 +354,10 @@ public class Distribution {
         // System.out.println(memI);
         // System.out.println(iCdf[memI]);
         // System.out.println(iCdf[memI - 1]);
-        System.out.println("iMinGap = " + String.valueOf(iMinGap));
+        // System.out.println("iMinGap = " + String.valueOf(iMinGap));
         // iMinGap = Math.max(iMinGap, 4.761904761904762e-10);
         int length = (int)Math.ceil(1.0 / iMinGap) + 1;
-        System.out.println("length = " + String.valueOf(length));
+        // System.out.println("length = " + String.valueOf(length));
         idHashTID = new long[length];
         idHashCDF = new double[length];
         idHashRatio = new double[length];

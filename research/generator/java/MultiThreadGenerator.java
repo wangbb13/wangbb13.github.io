@@ -13,19 +13,24 @@ class Single extends Thread {
     private Distribution distrIn;
     private Distribution distrOut;
     private String threadName;
-    private Store store;
+    // private Store store;
     private int row;
     private int step;
+    // for statistic time
+    private long startTime;
+    private static int done = 0;
 
-    public Single(int iid, Distribution in, Distribution out, String file, int n, int s) {
+    public Single(int iid, Distribution in, Distribution out, String file, int n, int s, long st) {
         startId = iid;
         distrIn = in;
         distrOut = out;
         threadName = String.valueOf(iid);
-        store = new Store(file);
+        // store = new Store(file);
         t = new Thread(this, threadName);
         row = n;
         step = s;
+        // for statistic time
+        startTime = st;
     }
 
     public void run() {
@@ -37,11 +42,23 @@ class Single extends Thread {
                 long t = distrIn.genTargetID();
                 adj.add(t);
             }
-            store.writeln(sid, adj);
+            // store.writeln(sid, adj);
             adj.clear();
             sid += step;
         }
-        store.close();
+        // store.close();
+        // for statistic time
+        synchronized (Single.class) {
+            done++;
+            if (done == step) {
+                long end = System.nanoTime();
+                long totalTime = end - startTime;
+                System.out.println("Total running time: ");
+                System.out.println(String.valueOf(totalTime) + " ns.");
+                double sec = totalTime * 1.0 / 1e9;
+                System.out.println(String.valueOf(sec) + " s.");
+            }
+        }
     }
 
     public void start() {
@@ -52,7 +69,7 @@ class Single extends Thread {
 }
 
 public class MultiThreadGenerator {
-    public void genPWL(String[] args) {
+    public void genPWL(String[] args, long sTime) {
         // System.out.println(args.length);
         if (args.length != 10) {
             System.out.println("usage: java MultiThreadGenerator ilambda idmin idmax olambda odmin odmax nodes edges filename threads");
@@ -85,10 +102,18 @@ public class MultiThreadGenerator {
         Single[] threads = new Single[nThreads];
         for (int i = 0; i < nThreads; ++i) {
             String file = filename + "_" + String.valueOf(i);
-            threads[i] = new Single(i, iPL, oPL, file, (int)nNodes, nThreads);
+            threads[i] = new Single(i, iPL, oPL, file, (int)nNodes, nThreads, sTime);
         }
         for (int i = 0; i < nThreads; ++i) {
             threads[i].start();
+        }
+
+        for (int i = 0; i < nThreads; ++i) {
+            try {
+                threads[i].join();
+            } catch (InterruptedException e) {
+
+            }
         }
         // end
         // System.out.println("actual number of edges = " + String.valueOf(actualEdges));
@@ -98,12 +123,12 @@ public class MultiThreadGenerator {
     public static void main(String[] args) {
         long start = System.nanoTime();
         MultiThreadGenerator gen = new MultiThreadGenerator();
-        gen.genPWL(args);
-        long end = System.nanoTime();
-        long totalTime = end - start;
-        System.out.println("Total running time: ");
-        System.out.println(String.valueOf(totalTime) + " ns.");
-        double sec = totalTime * 1.0 / 1e9;
-        System.out.println(String.valueOf(sec) + " s.");
+        gen.genPWL(args, start);
+        // long end = System.nanoTime();
+        // long totalTime = end - start;
+        // System.out.println("Total running time: ");
+        // System.out.println(String.valueOf(totalTime) + " ns.");
+        // double sec = totalTime * 1.0 / 1e9;
+        // System.out.println(String.valueOf(sec) + " s.");
     }
 }
