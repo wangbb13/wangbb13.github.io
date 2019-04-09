@@ -46,6 +46,19 @@ class One extends Thread {
     }
 }
 
+class Demo {
+    private int x;
+    public Demo(int n) {
+        n = x;
+    }
+    public void setX(int n) {
+        x = n;
+    }
+    public int getX() {
+        return x;
+    }
+}
+
 public class Test {
     void testRound() {
         long num = 10;
@@ -106,6 +119,27 @@ public class Test {
         } finally {
 
         }
+    }
+
+    void testIOPerformance() {
+        long start = System.nanoTime();
+        long size = 1 << 30;
+        try {
+            FileWriter fw = new FileWriter("test.txt");
+            PrintWriter pw = new PrintWriter(fw);
+            for (long i = 0; i < size; ++i) {
+                pw.print(i);
+            }
+            pw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 
+        }
+        long end = System.nanoTime();
+        System.out.print((end - start) * 1.0 / 1e9);
+        System.out.println(" s.");
     }
 
     void testSet() {
@@ -171,6 +205,72 @@ public class Test {
         System.out.println(total * 1.0 / 1e9);
     }
 
+    void printArray(int[] array) {
+        for (int i = 0; i < array.length; ++i) {
+            System.out.print(array[i]);
+            System.out.print(" ");
+        }
+        System.out.println("");
+    }
+
+    void printArray(long[] array) {
+        for (int i = 0; i < array.length; ++i) {
+            System.out.print(array[i]);
+            System.out.print(" ");
+        }
+        System.out.println("");
+    }
+
+    void testPWL() {
+        long minD = 1;
+        long maxD = 50;
+        long n = 1000;
+        long m = 18000;
+        Map<String, Double> theta = new HashMap<String, Double>();
+        theta.put("lambda", 1.12);
+        PowerLaw pwl = new PowerLaw(minD, maxD, n, m, theta);
+        // pwl.preProcess(false);  // in-degree
+        // pwl.printICdf();
+        // System.out.println(pwl.getIMinGap());
+        // pwl.preProcess(true);   // out-degree
+        // long[] oDNum = pwl.getOdNum();
+        // int[] split = pwl.splitSourceNodes(10);
+        // printArray(oDNum);
+        // printArray(split);
+        pwl.preProcess(true);   // out-degree
+        pwl.printOCdf();
+    }
+
+    public void testClass() {
+        Demo d1 = new Demo(10);
+        Demo d2 = d1;
+        d2.setX(20);
+        System.out.println(d1.getX());
+        System.out.println(d2.getX());
+    }
+
+    public void testDelta() {
+        int n1 = 10, m1 = 100, minD1 = 1, maxD1 = 20;
+        int n2 = 20, m2 = 200, minD2 = 1, maxD2 = 30;
+        Map<String, Double> theta = new HashMap<String, Double>();
+        theta.put("lambda", 1.12);
+        OutDegreeDistribution odd1 = new OutPowerLaw(minD1, maxD1, n1, m1, theta);
+        OutDegreeDistribution odd2 = new OutPowerLaw(minD2, maxD2, n2, m2, theta);
+        odd1.showDegreeNums();
+        odd2.showDegreeNums();
+        DeltaOutDistribution dod = new DeltaOutDistribution(null, odd2);
+        dod.showDegreeNums();
+    }
+
+    public void testString() {
+        String filename = "test.txt";
+        String[] ans = filename.split("\\.");
+        System.out.println(ans.length);
+        for (String str : ans) {
+            System.out.println(str);
+        }
+    }
+
     public static void main(String[] args) {
         Test t = new Test();
         // t.misc();
@@ -180,6 +280,11 @@ public class Test {
         // t.testArrayList();
         // t.testMyUtil();
         // t.testMT();
-        t.testRV();
+        // t.testRV();
+        // t.testIOPerformance();
+        // t.testPWL();
+        // t.testClass();
+        // t.testDelta();
+        t.testString();
     }
 }

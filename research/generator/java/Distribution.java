@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 public class Distribution {
     private long minDegree;
@@ -24,7 +23,7 @@ public class Distribution {
     private long odSimpleMemNo;     // memory
     private int odSimpleMemId;     // memory
     private long odSimpleMemoff;    // memory
-    private long [] odSimpleCNum;   // cumulative number of nodes whose degree less than some degree
+    private long [] odSimpleCNum;   // number of nodes whose degree is i + minDegree
     // arrays and variables for getting out-degree intricately
     private long [] odComplexDegree;    // get a degree directly
     private double oMinGap;
@@ -460,5 +459,66 @@ public class Distribution {
             r = idHashRatio[index - 1];
         }
         return a + Math.round((rv - c) * r);
+    }
+
+    public double getOMinGap() {
+        return oMinGap;
+    }
+
+    public double getIMinGap() {
+        return iMinGap;
+    }
+
+    public void printICdf() {
+        for (int i = 0; i < idHashCDF.length; ++i) {
+            System.out.println(idHashCDF[i]);
+        }
+    }
+
+    public void printOCdf() {
+        int size = odSimpleCNum.length;
+        double[] cdf = new double[size];
+        cdf[0] = odSimpleCNum[0];
+        for (int i = 1; i < size; ++i) {
+            cdf[i] = cdf[i - 1] + odSimpleCNum[i];
+        }
+        for (int i = 0; i < size; ++i) {
+            cdf[i] /= cdf[size - 1];
+        }
+        double ans = 1.0;
+        for (int i = 0; i < size; ++i) {
+            System.out.println(cdf[i]);
+            if (i > 0) {
+                ans = Math.min(ans, cdf[i] - cdf[i - 1]);
+            }
+        }
+        System.out.println("min out gap = " + String.valueOf(ans));
+    }
+
+    public int[] splitSourceNodes(int nThreads) {
+        int[] ans = new int[nThreads + 1];
+        ans[0] = 0;
+        long step = (long)(numEdges / nThreads);
+        long vc = step;
+        int j = 0;
+        int d = (int)minDegree;
+        long sum = 0;
+        int acc = 0;
+        for (int i = 1; i < nThreads; ++i) {
+            while (j < odSimpleCNum.length && sum < vc) {
+                sum += d * odSimpleCNum[j];
+                acc += (int)odSimpleCNum[j];
+                d++;
+                j++;
+            }
+            vc += step;
+            ans[i] = acc;
+        }
+        ans[nThreads] = (int)numNodes;
+        return ans;
+    }
+
+    public long[] getOdNum() {
+        return odSimpleCNum;
     }
 }

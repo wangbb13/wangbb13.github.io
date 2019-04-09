@@ -14,29 +14,31 @@ class Single extends Thread {
     private Distribution distrOut;
     private String threadName;
     // private Store store;
-    private int row;
-    private int step;
+    private int rowLId;
+    private int rowRId;
+    
     // for statistic time
     private long startTime;
+    private int nThreads;
     private static int done = 0;
 
-    public Single(int iid, Distribution in, Distribution out, String file, int n, int s, long st) {
+    public Single(int iid, Distribution in, Distribution out, String file, int lId, int rId, long sTime, int threads) {
         startId = iid;
         distrIn = in;
         distrOut = out;
         threadName = String.valueOf(iid);
         // store = new Store(file);
         t = new Thread(this, threadName);
-        row = n;
-        step = s;
+        rowLId = lId;
+        rowRId = rId;
         // for statistic time
-        startTime = st;
+        startTime = sTime;
+        nThreads = threads;
     }
 
     public void run() {
         Set<Long> adj = new HashSet<Long>();
-        int sid = startId;
-        while (sid < row) {
+        for (int sid = rowLId; sid < rowRId; ++sid) {
             long outDegree = distrOut.genOutDegree(sid);
             while (adj.size() < outDegree) {
                 long t = distrIn.genTargetID();
@@ -44,13 +46,12 @@ class Single extends Thread {
             }
             // store.writeln(sid, adj);
             adj.clear();
-            sid += step;
         }
         // store.close();
         // for statistic time
         synchronized (Single.class) {
             done++;
-            if (done == step) {
+            if (done == nThreads) {
                 long end = System.nanoTime();
                 long totalTime = end - startTime;
                 System.out.println("Total running time: ");
@@ -100,9 +101,10 @@ public class MultiThreadGenerator {
 
         // generation
         Single[] threads = new Single[nThreads];
+        int[] split = oPL.splitSourceNodes(nThreads);
         for (int i = 0; i < nThreads; ++i) {
             String file = filename + "_" + String.valueOf(i);
-            threads[i] = new Single(i, iPL, oPL, file, (int)nNodes, nThreads, sTime);
+            threads[i] = new Single(i, iPL, oPL, file, split[i], split[i + 1], sTime, nThreads);
         }
         for (int i = 0; i < nThreads; ++i) {
             threads[i].start();
