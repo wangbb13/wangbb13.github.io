@@ -92,13 +92,20 @@ int NGPowerLow::number_of_dmax() {
 ullint NGPowerLow::current_edges() {
     // TODO: some problems
     double __sum = 0.0, __zip = 0.0, __t;
+    int range = dmax - dmin + 1;
+    double *p = new double[range];
     for (int i = dmin; i <= dmax; ++ i) {
         __t = pow(i * 1.0, lambda);
         __sum += __t;
-        __zip += i * __t;
+        p[i - dmin] = __t;
+        // __zip += i * __t;
     }
     double __c = nodes / __sum;
-    return (ullint)(__c * __zip);
+    ullint ans = 0;
+    for (int i = 0; i < range; ++i) {
+        ans += (ullint)(__c * p[i] * (i + dmin));
+    }
+    return ans;
 }
 
 void NGPowerLow::pre_processing() {
