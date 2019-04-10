@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
 
     for (int i = 0; i < nodes; ++ i) {
         unordered_set<int> adj;
-        int d_out = opwl.get_d();
+        int d_out = opwl.get_d(i);
         all_e += d_out;
         for (int k = 0; k < d_out; ++ k) {
             int j = ipwl.get_j();

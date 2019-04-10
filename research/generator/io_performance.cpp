@@ -11,118 +11,183 @@
 #include <sstream>
 #include <iterator>
 
-std::string filename = "test.txt";
-const char* file_name = "test.txt";
+#include "buffer_writer.hpp"
 
-std::vector<uint64_t> GenerateData(std::size_t bytes)
-{
-    assert(bytes % sizeof(uint64_t) == 0);
-    std::vector<uint64_t> data(bytes / sizeof(uint64_t));
-    std::iota(data.begin(), data.end(), 0);
-    std::shuffle(data.begin(), data.end(), std::mt19937{ std::random_device{}() });
-    return data;
-}
+// std::string filename = "test.txt";
+// const char* file_name = "test.txt";
 
-long long option_1(std::size_t bytes)
-{
-    std::vector<uint64_t> data = GenerateData(bytes);
+// std::vector<uint64_t> GenerateData(std::size_t bytes)
+// {
+//     assert(bytes % sizeof(uint64_t) == 0);
+//     std::vector<uint64_t> data(bytes / sizeof(uint64_t));
+//     std::iota(data.begin(), data.end(), 0);
+//     std::shuffle(data.begin(), data.end(), std::mt19937{ std::random_device{}() });
+//     return data;
+// }
 
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
-    myfile.write((char*)&data[0], bytes);
-    myfile.close();
-    auto endTime = std::chrono::high_resolution_clock::now();
+// long long option_1(std::size_t bytes)
+// {
+//     std::vector<uint64_t> data = GenerateData(bytes);
 
-    return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-}
+//     auto startTime = std::chrono::high_resolution_clock::now();
+//     auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
+//     myfile.write((char*)&data[0], bytes);
+//     myfile.close();
+//     auto endTime = std::chrono::high_resolution_clock::now();
 
-long long option_2(std::size_t bytes)
-{
-    std::vector<uint64_t> data = GenerateData(bytes);
+//     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+// }
 
-    auto startTime = std::chrono::high_resolution_clock::now();
-    FILE* file = fopen(file_name, "wb");
-    fwrite(&data[0], 1, bytes, file);
-    fclose(file);
-    auto endTime = std::chrono::high_resolution_clock::now();
+// long long option_2(std::size_t bytes)
+// {
+//     std::vector<uint64_t> data = GenerateData(bytes);
 
-    return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-}
+//     auto startTime = std::chrono::high_resolution_clock::now();
+//     FILE* file = fopen(file_name, "wb");
+//     fwrite(&data[0], 1, bytes, file);
+//     fclose(file);
+//     auto endTime = std::chrono::high_resolution_clock::now();
 
-long long option_3(std::size_t bytes)
-{
-    std::vector<uint64_t> data = GenerateData(bytes);
+//     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+// }
 
-    std::ios_base::sync_with_stdio(false);
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
-    myfile.write((char*)&data[0], bytes);
-    myfile.close();
-    auto endTime = std::chrono::high_resolution_clock::now();
+// long long option_3(std::size_t bytes)
+// {
+//     std::vector<uint64_t> data = GenerateData(bytes);
 
-    return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-}
+//     std::ios_base::sync_with_stdio(false);
+//     auto startTime = std::chrono::high_resolution_clock::now();
+//     auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
+//     myfile.write((char*)&data[0], bytes);
+//     myfile.close();
+//     auto endTime = std::chrono::high_resolution_clock::now();
 
-long long option_4(std::size_t size) {
-    std::vector<uint64_t> data(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        data[i] = i;
-    }
+//     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+// }
+
+// long long option_4(std::size_t size) {
+//     std::vector<uint64_t> data(size);
+//     for (std::size_t i = 0; i < size; ++i) {
+//         data[i] = i;
+//     }
     
-    std::ios_base::sync_with_stdio(false);
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto myfile = std::fstream(filename, std::ios::out);
-    myfile.write((char*)&data[0], size);
-    myfile.close();
-    auto endTime = std::chrono::high_resolution_clock::now();
+//     std::ios_base::sync_with_stdio(false);
+//     auto startTime = std::chrono::high_resolution_clock::now();
+//     auto myfile = std::fstream(filename, std::ios::out);
+//     myfile.write((char*)&data[0], size);
+//     myfile.close();
+//     auto endTime = std::chrono::high_resolution_clock::now();
 
-    return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-}
+//     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+// }
 
-template<typename T>
-std::string to_str(T n) {
-    std::ostringstream oss;
-    oss << n;
-    return oss.str();
-}
+// template<typename T>
+// std::string to_str(T n) {
+//     std::ostringstream oss;
+//     oss << n;
+//     return oss.str();
+// }
 
-long long option_5(std::size_t size) {
-    std::vector<std::string> data(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        data[i] = std::to_string(i) + " " + std::to_string(size - i);
+// long long option_5(std::size_t size) {
+//     std::vector<std::string> data(size);
+//     for (std::size_t i = 0; i < size; ++i) {
+//         data[i] = std::to_string(i) + " " + std::to_string(size - i);
+//     }
+
+//     std::ios_base::sync_with_stdio(false);
+//     auto startTime = std::chrono::high_resolution_clock::now();
+//     auto myfile = std::fstream(filename, std::ios::out);
+//     // myfile.write((char*)&data[0], size);
+//     std::ostream_iterator<std::string> oi(myfile, "\n");
+//     std::copy(data.begin(), data.end(), oi);
+//     myfile.close();
+//     auto endTime = std::chrono::high_resolution_clock::now();
+
+//     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+// }
+
+void bench0(int n) {
+    // naive method
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    std::ofstream fout("test_0.txt");
+    int row = 233;
+    std::vector<int> data(255);
+    std::fill(data.begin(), data.end(), 233);
+    
+    for (int i = 0; i < n; ++i) {
+        fout << row;
+        for (int j = 0; j < data.size(); ++j) {
+            fout << " " << data[j];
+        }
+        fout << std::endl;
     }
-
-    std::ios_base::sync_with_stdio(false);
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto myfile = std::fstream(filename, std::ios::out);
-    // myfile.write((char*)&data[0], size);
-    std::ostream_iterator<std::string> oi(myfile, "\n");
-    std::copy(data.begin(), data.end(), oi);
-    myfile.close();
-    auto endTime = std::chrono::high_resolution_clock::now();
-
-    return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-}
-
-void test() {
-    // std::string str = std::to_string(100000) + " " + std::to_string(int(1 << 27) - 100000) + "\n";
-    std::string s = "123456789";
-    std::vector<std::string> vs;
-    vs.push_back(s);
-    std::ofstream fout(filename);
-    // fout.write(s.c_str(), sizeof(char) * s.size());
-    // fout.write((char*)&vs[0], sizeof(char) * s.size());
-    std::ostream_iterator<std::string> oi(fout, "\n");
-    std::copy(vs.begin(), vs.end(), oi);
     fout.close();
 
-    std::ifstream fin(filename);
-    fin.seekg(0, fin.end);
-    long size = fin.tellg();
-    fin.seekg(0);
-    char* buffer = new char[size];
-    fin.read(buffer, size);
-    std::cout << buffer << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
+}
+
+void bench1(int n) {
+    // std::copy
+    std::ios_base::sync_with_stdio(false);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::vector<int> data(256);
+    std::fill(data.begin(), data.end(), 233);
+
+    std::ofstream fout("test_1.txt");
+    std::ostream_iterator<int> oi(fout, " ");
+    for (int i = 0; i < n; ++i) {
+        std::copy(data.begin(), data.end(), oi);
+        fout << std::endl;
+    }
+    fout.close();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
+}
+
+void bench2(int n) {
+    // std::copy
+    std::ios_base::sync_with_stdio(false);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    int row = 233;
+    std::vector<int> data(255);
+    std::fill(data.begin(), data.end(), 233);
+
+    int buffer_size = 1 << 24;
+    BufferWriter bw("test_2.txt", buffer_size);
+    for (int i = 0; i < n; ++i) {
+        bw.write(row);
+        for (auto& x : data) {
+            bw.space();
+            bw.write(x);
+        }
+        bw.new_line();
+    }
+    bw.close();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
+}
+
+void bench_C(int n) {
+    // 
+}
+
+void bench_Cpp(int n) {
+    // 
+}
+
+void bench_posix(int n) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
 }
 
 int main()
@@ -131,9 +196,11 @@ int main()
     const std::size_t MB = 1024 * kB;
     const std::size_t GB = 1024 * MB;
 
-    const std::size_t size = 1 << 27;
+    int n = 1 << 20;
 
-    test();
+    bench0(n);
+    bench1(n);
+    bench2(n);
 
     // std::cout << "option1, " << size / MB << "MB: " << option_1(size) << "ms" << std::endl;
     // std::cout << "option2, " << size / MB << "MB: " << option_2(size) << "ms" << std::endl;

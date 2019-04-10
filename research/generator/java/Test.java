@@ -301,6 +301,25 @@ public class Test {
         }
     }
 
+    public void testStore(int n, int bf) {
+        long start = System.nanoTime();
+
+        Set<Long> set = new HashSet<Long>();
+        for (int i = 100; i < 355; ++i) {
+            set.add((long)i);
+        }
+        Long row = (long)233;
+        Store store = new Store("test_java.txt", bf);
+        for (int i = 0; i < n; ++i) {
+            store.writeln(row, set);
+        }
+        store.flush();
+
+        long end = System.nanoTime();
+        System.out.print((end - start) / 1e6);
+        System.out.println(" ms.");
+    }
+
     public static void main(String[] args) {
         Test t = new Test();
         // t.misc();
@@ -317,6 +336,12 @@ public class Test {
         // t.testDelta();
         // t.testString();
         // t.testBitOp();
-        t.testBufferWR();
+        // t.testBufferWR();
+	    int n = 1 << 20;
+	    int bf = 1 << 20;
+	    for (int i = 0; i < 6; ++i) {
+	        t.testStore(n, bf);
+	        bf <<= 1;
+	    }
     }
 }

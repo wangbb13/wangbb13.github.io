@@ -25,6 +25,10 @@ private:
     // for out-degree
     int d_index, d_number;
     std::vector<int> simple_mf;
+    
+    double out_factor;
+    int *odComplexDegree;
+    int od_length;
 
     // for in-degree
     double hash_factor;
@@ -36,14 +40,17 @@ private:
 
 private:
     void pre_processing();
+    void mid_processing();
     void post_processing();
     double gen_uniform();
     int hash_function(double);
     int number_of_dmax();
     ullint current_edges();
 
+    double pdf(int n);
+
 public:
-    int get_d();
+    int get_d(int);
     int get_j();
     NGPowerLow(double, int, int, int, ullint);
     ~NGPowerLow() {}
@@ -75,9 +82,58 @@ NGPowerLow::NGPowerLow(double _lambda, int _dmin, int _dmax, int _nodes, ullint 
         simple_mf[i] = (int)(__c * __temp[i]);
     d_index = 0;
     d_number = 0;
+    mid_processing();
 
     // for in-degree in memory
     post_processing();
+}
+
+double NGPowerLow::pdf(int n) {
+    return pow(n * 1.0, lambda);
+}
+
+void NGPowerLow::mid_processing() {
+    // get CDF of out-degree distribution
+    int size = dmax - dmin + 1;
+    double *temp = new double[size];
+    double sum = 0.0;
+    double minGap = 1.0;
+    double pre = 0.0;
+    int iminDegree = dmin;
+    int imaxDegree = dmax;
+    for (int i = iminDegree; i <= imaxDegree; ++i) {
+        sum += pdf(i);
+        temp[i - iminDegree] = sum;
+    }
+    double alpha = 1.0 / sum;
+    for (int i = 0; i < size; ++i) {
+        temp[i] *= alpha;
+        minGap = std::min(minGap, temp[i] - pre);
+        pre = temp[i];
+    }
+    // end CDF
+    int length = (int)(1.0 / minGap) + 2;
+    odComplexDegree = new int[length];
+    pre = 0.0;
+    int j = 0;
+    int d = dmin;
+    // build
+    for (int i = 0; i < size; ++i) {
+        int steps = (int)((temp[i] - pre) / minGap);
+        for (int p = 0; p < steps; ++p) 
+            odComplexDegree[j++] = d;
+        pre += steps * minGap;
+        while (pre < temp[i]) {
+            odComplexDegree[j++] = d;
+            pre += minGap;
+        }
+        d = i + dmin;
+    }
+    while (j < length)
+        odComplexDegree[j++] = d;
+    // end build
+    out_factor = minGap;
+    od_length = length;
 }
 
 int NGPowerLow::number_of_dmax() {
@@ -109,8 +165,24 @@ ullint NGPowerLow::current_edges() {
 }
 
 void NGPowerLow::pre_processing() {
-    while (number_of_dmax() < 1) 
-        dmax -= 1;
+    dmax = std::min(dmax, nodes);
+    int bin_l = dmax + 1;
+    int bin_r = dmax;
+    while (bin_r > 0 && number_of_dmax() < 1) {
+        bin_r = dmax;
+        dmax /= 2;
+        bin_l = dmax;
+    }
+    while (bin_l < bin_r) {
+        dmax = (bin_l + bin_r) / 2;
+        int num = number_of_dmax();
+        if (num < 1) 
+            bin_r = dmax;
+        else
+            bin_l = dmax + 1;
+    }
+    dmax = bin_l - 1;
+
     ullint __edges = current_edges();
     // print mid information
     std::cout << "current edges = " << __edges << " expected edges = " << edges << std::endl;
@@ -165,18 +237,24 @@ void NGPowerLow::pre_processing() {
     }
 }
 
-int NGPowerLow::get_d() {
-    if (d_index < drange) {
-        if (d_number < simple_mf[d_index]) 
-            d_number += 1;
-        else {
-            d_index += 1;
-            d_number = 1;
-        }
-        return d_index + dmin;
-    } else {
-        return d_index + dmin - 1;
-    }
+int NGPowerLow::get_d(int id) {
+    // if (d_index < drange) {
+    //     if (d_number < simple_mf[d_index]) 
+    //         d_number += 1;
+    //     else {
+    //         d_index += 1;
+    //         d_number = 1;
+    //     }
+    //     return d_index + dmin;
+    // } else {
+    //     return d_index + dmin - 1;
+    // }
+
+    int bucket = 10;
+    double bucket_step = bucket * 1.0 / nodes;
+    double rv = ((id / bucket) + distribution(generator)) * bucket_step;
+    int index = std::min((int)(rv / out_factor), od_length - 1);
+    return odComplexDegree[index];
 }
 
 double NGPowerLow::gen_uniform() {

@@ -52,7 +52,7 @@ public class Streaming {
         File sourceFile = new File(filename);
         long actualEdges = 0, iterEdges = 0;
         double curRate = generationRate;
-        Store store = new Store(filename);
+        Store store = new Store(filename, 1 << 21);
         Set<Long> adj = new HashSet<Long>();
         OutDegreeDistribution preOdd = null;
         do {

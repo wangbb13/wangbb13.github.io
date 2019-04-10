@@ -18,8 +18,8 @@ public class Store {
     private BufferedWriter bw;
     private int bufferSize;
 
-    public Store(String filename) {
-        bufferSize = 1 << 20;
+    public Store(String filename, int bf) {
+        bufferSize = bf;
         try {
             fw = new FileWriter(filename);
             pw = new PrintWriter(fw);

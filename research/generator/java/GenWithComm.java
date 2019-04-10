@@ -48,7 +48,7 @@ public class GenWithComm {
         
         // generation
         long actualEdges = 0;
-        Store store = new Store(filename);
+        Store store = new Store(filename, 1 << 21);
         Set<Long> adj = new HashSet<Long>();
         int[][] split = Utility.splitCommunity((int)nNodes, (int)nNodes, nCom, cLambda);
         int anComms = split.length;
