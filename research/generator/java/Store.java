@@ -33,7 +33,9 @@ public class Store {
         if (!adj.isEmpty()) {
             pw.print(i);
             for (Long n : adj) {
-                pw.printf(" %d", n);
+                // pw.printf(" %d", n);
+                pw.print(" ");
+                pw.print(n);
             }
             pw.println();
         }
@@ -41,32 +43,32 @@ public class Store {
 
     public void writelnWithBW(long i, Set<Long> adj) {
         if (!adj.isEmpty()) {
-            String ans = String.valueOf(i);
-            for (Long n : adj) {
-                ans = ans + " " + String.valueOf(n);
+            try {
+                bw.write(Long.toString(i));
+                for (long n : adj) {
+                    bw.write(" ");
+                    bw.write(Long.toString(n));
+                }
+                // bw.write("\n");
+                bw.newLine();
+            } catch (IOException ioe) {
+
             }
-            ans = ans + "\n";
-            write(ans, bw);
-        }
-    }
-
-    private static void write(String record, Writer writer) {
-        try {
-            writer.write(record);
-            writer.flush();
-        } catch (IOException ie) {
-
         }
     }
 
     public void writeln(long i, Set<Long> adj) {
-        writelnWithPW(i, adj);
-        // writelnWithBW(i, adj);
+        // writelnWithPW(i, adj);
+        writelnWithBW(i, adj);
     }
 
     public void flush() {
-        pw.flush();
-        // bw.flush();
+        try {
+            bw.flush();
+        } catch (IOException ioe) {
+
+        }
+        // pw.flush();
     }
 
     public void close() {
