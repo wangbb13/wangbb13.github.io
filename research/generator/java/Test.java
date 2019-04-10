@@ -5,6 +5,9 @@ import java.util.Random;
 import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -271,6 +274,33 @@ public class Test {
         }
     }
 
+    public void testBitOp() {
+        Set<Long> al = new HashSet<Long>();
+        al.add((long)1);
+        al.add((long)100);
+        for (long x : al) {
+            System.out.println(x);
+        }
+    }
+
+    public void testBufferWR() {
+        try {
+            String filename = "test.txt";
+            int bufferSize = 1 << 20;
+            BufferedWriter bw = new BufferedWriter(new FileWriter(filename), bufferSize);
+            bw.write(Integer.toString(100));
+            bw.write(" ");
+            bw.write(Integer.toString(200));
+            bw.write("\n");
+            bw.close();
+            BufferedReader br = new BufferedReader(new FileReader(filename), bufferSize);
+            String ans = br.readLine();
+            System.out.println(ans);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         Test t = new Test();
         // t.misc();
@@ -285,6 +315,8 @@ public class Test {
         // t.testPWL();
         // t.testClass();
         // t.testDelta();
-        t.testString();
+        // t.testString();
+        // t.testBitOp();
+        t.testBufferWR();
     }
 }
