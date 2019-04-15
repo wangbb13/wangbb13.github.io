@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Collections;
 
 class One extends Thread {
     private static int count = 0;
@@ -320,6 +321,17 @@ public class Test {
         System.out.println(" ms.");
     }
 
+    public void testSort() {
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        list.add(3);
+        list.add(2);
+        list.add(9);
+        Collections.sort(list);
+        for (int e : list) {
+            System.out.println(e);
+        }
+    }
+
     public static void main(String[] args) {
         Test t = new Test();
         // t.misc();
@@ -337,11 +349,14 @@ public class Test {
         // t.testString();
         // t.testBitOp();
         // t.testBufferWR();
-	    int n = 1 << 20;
-	    int bf = 1 << 20;
-	    for (int i = 0; i < 6; ++i) {
-	        t.testStore(n, bf);
-	        bf <<= 1;
-	    }
+
+        // int n = 1 << 20;
+        // int bf = 1 << 20;
+        // for (int i = 0; i < 6; ++i) {
+        //     t.testStore(n, bf);
+        //     bf <<= 1;
+        // }
+
+        t.testSort();
     }
 }
