@@ -4,6 +4,10 @@ fn=P$1.cpp
 
 if [ -f $fn ]; then
 	echo $fn exists.
+	if [ $2 == 1 ]; then
+		echo open $fn ...
+		vim $fn
+	fi
 	exit 0
 fi
 
