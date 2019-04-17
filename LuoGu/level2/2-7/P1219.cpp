@@ -9,6 +9,16 @@ int show = 0;
 vector<int> nums(14);
 vector<bool> flag(30);
 
+// improve solution
+vector<int> row(30);
+// vector<bool> column(30);
+// vector<bool> pos(30);
+// vector<bool> neg(30);
+
+bool column[30] = {false};
+bool pos[30] = {false};
+bool neg[30] = {false};
+
 inline void swap(int i, int j) {
 	int temp = nums[i];
 	nums[i] = nums[j];
@@ -64,31 +74,38 @@ void sln(int s) {
 	}
 }
 
+void sln_2(int s) {
+	if (s > N) {
+		if (ans < 3) {
+			for (int i = 1; i <= N; ++i) {
+				cout << row[i] << " ";
+			}
+			cout << endl;
+		}
+		ans++;
+		return;
+	}
+	for (int i = 1; i <= N; ++i) {
+		if (!column[i] && !pos[i + s] && !neg[i - s + N]) {
+			column[i] = true;
+			pos[i + s] = true;
+			neg[i - s + N] = true;
+			row[s] = i;
+			sln_2(s + 1);
+			column[i] = false;
+			pos[i + s] = false;
+			neg[i - s + N] = false;
+		}
+	}
+}
+
 int main() {
 	cin >> N;
-	// init(N);
-	// sln(1);
-	// cout << ans << endl;
-	if (N == 11) {
-		cout << "1 3 5 7 9 11 2 4 6 8 10" << endl;
-		cout << "1 3 6 9 2 8 11 4 7 5 10" << endl;
-		cout << "1 3 7 9 4 2 10 6 11 5 8" << endl;
-		cout << 2680 << endl;
-	} else if (N == 12) {
-		cout << "1 3 5 8 10 12 6 11 2 7 9 4" << endl;
-		cout << "1 3 5 10 8 11 2 12 6 9 7 4" << endl;
-		cout << "1 3 5 10 8 11 2 12 7 9 4 6" << endl;
-		cout << 14200 << endl;
-	} else if (N == 13) {
-		cout << "1 3 5 2 9 12 10 13 4 6 8 11 7" << endl;
-		cout << "1 3 5 7 9 11 13 2 4 6 8 10 12" << endl;
-		cout << "1 3 5 7 12 10 13 6 4 2 8 11 9" << endl;
-		cout << 73712 << endl;
-	} else {
-		init(N);
-		sln(1);
-		cout << ans << endl;
-	}
+	// std::fill(column.begin(), column.end(), false);
+	// std::fill(pos.begin(), pos.end(), false);
+	// std::fill(neg.begin(), neg.end(), false);
+	sln_2(1);
+	cout << ans << endl;
     return 0;
 }
 
