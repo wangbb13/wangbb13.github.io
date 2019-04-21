@@ -14,6 +14,12 @@ fi
 touch $fn
 echo create $fn done. 
 
+echo "/**" >> $fn
+echo " * Description: " >> $fn 
+echo " * Input : " >> $fn
+echo " * Output: " >> $fn
+echo " * Time/Space Limit: 1s/128MB" >> $fn
+echo " */" >> $fn
 echo "#include <iostream>" >> $fn
 echo "using namespace std;" >> $fn
 echo "" >> $fn
