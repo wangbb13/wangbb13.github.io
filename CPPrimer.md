@@ -99,3 +99,70 @@
 >    
 >
 > 2. 
+
+## Misc
+
+1. lvalue and rvalue
+
+   `//TODO`
+
+2. rvalue references
+
+   > 思想：利用临时变量，可以对其进行修改，减少复制大对象的操作。
+
+   可以将右值引用与 `const ` lvalue 绑定，但不能以右值引用来初始化一个非 `const` 引用，如下：
+
+   ```c++
+   int& x = 666;			// Error (VS的报错信息：无法从 int 转为 int&)
+   const int& x = 666; 	// OK
+   ```
+
+   但是这样适用却无法修改rvalue，因此C++11后引入右值引用。
+
+   不使用右值引用进行对象间的赋值运算时，会出现两次内存分配：
+
+   1）发生在临时对象创建时；2）发生在将临时对象的内容拷贝到目标对象时。
+
+   使用右值引用就可以利用临时对象已经分配的内存空间，避免上述的第二次内存分配。
+
+   > 理解：Don't copy, just move. 
+
+   How to move lvalues?
+
+   Ans: use `std::move`
+
+   
+
+   参考博客：<https://www.internalpointers.com/post/c-rvalue-references-and-move-semantics-beginners>
+
+3. move semantics
+
+4. Rules of Three：如果类中定义了以下一个或多个方法，应该显式地定义所有的三个方法
+
+   - **析构函数（destructor）**
+   - **拷贝构造函数（copy constructor）**：用一个已存在对象创建一个新的对象
+   - **拷贝赋值运算符（copy assignment operator）**：用一个已存在的对象替换另一个已存在的对象
+
+5. Rules of Five：现代C++的规则，增加如下两个方法
+
+   - **the move constructor**
+   - **the move assignment operator**
+
+   PS：一般情况下，move constructor从未被调用，这是因为现代编译器使用 **Return Value Optimization（RVO）** 技术检测到程序通过返回一个对象构造新对象，会省去调用构造函数进行创建新对象的操作。在gcc中，可以使用 `-fno-elide-constructors` 省去这一优化，打开这一开关后，会发现构造/析构次数明显增加。
+
+6. C++ keyword `typename` 用法及含义
+
+   case 1：用于定义模板中的类型名，与 `class` 关键字含义相同
+
+   case 2：To **specify that the following identifier is a type**. Otherwise the identifier may be regarded as a static member. For example:
+
+   ```c++
+   template <typename T>
+   class MyClass {
+       typename T::SubType * ptr;	// ptr is a pointer to the type T::SubType
+       T::Subtype * ptr;	// may be a multiplication of value SubType of T with ptr
+   };
+   // TODO：不过不加好像也没事？是否是仅为了可读性而加的typename
+   ```
+
+7. 
