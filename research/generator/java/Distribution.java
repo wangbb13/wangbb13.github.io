@@ -471,7 +471,7 @@ public class Distribution {
 
     public void printICdf() {
         for (int i = 0; i < idHashCDF.length; ++i) {
-            System.out.println(idHashCDF[i]);
+            System.out.println(String.valueOf(idHashTID[i]) + " " + String.valueOf(idHashCDF[i]));
         }
     }
 
