@@ -227,12 +227,12 @@ public class Test {
 
     void testPWL() {
         long minD = 1;
-        long maxD = 50;
-        // long maxD = 10;
-        long n = 1000;
-        long m = 18000;
-        // long n = 100;
-        // long m = 330;
+        // long maxD = 50;
+        long maxD = 10;
+        // long n = 1000;
+        // long m = 18000;
+        long n = 100;
+        long m = 330;
         Map<String, Double> theta = new HashMap<String, Double>();
         theta.put("lambda", 1.12);
         PowerLaw pwl = new PowerLaw(minD, maxD, n, m, theta);
@@ -244,10 +244,10 @@ public class Test {
         // int[] split = pwl.splitSourceNodes(10);
         // printArray(oDNum);
         // printArray(split);
-        pwl.preProcess(true);   // out-degree
-        pwl.printOCdf();
-        // pwl.preProcess(false);   // out-degree
-        // pwl.printICdf();
+        // pwl.preProcess(true);   // out-degree
+        // pwl.printOCdf();
+        pwl.preProcess(false);   // in-degree
+        pwl.printICdf();
     }
 
     public void testClass() {
@@ -348,7 +348,7 @@ public class Test {
         // t.testMT();
         // t.testRV();
         // t.testIOPerformance();
-        // t.testPWL();
+        t.testPWL();
         // t.testClass();
         // t.testDelta();
         // t.testString();
@@ -362,6 +362,6 @@ public class Test {
         //     bf <<= 1;
         // }
 
-        t.testSort();
+        // t.testSort();
     }
 }

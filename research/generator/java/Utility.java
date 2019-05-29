@@ -20,13 +20,21 @@ public class Utility {
         return 0.5 + sum * Utility.normPdf(x);
     }
 
+    public static void showList(int[] list) {
+        for (int i = 0; i < list.length; ++i) {
+            System.out.printf("%d ", list[i]);
+        }
+        System.out.println();
+    }
+
     /*
      * k: the number of comms
+     * n: # nodes
      */
     public static int[] splitScalar(int n, int k, double lambda) {
         lambda = -Math.abs(lambda);
         int avgSize = n / k;
-        int step = (int)Math.max(avgSize / 10, 1);
+        int step = 0;
         int memory = 0;
         int lr = 0;
         int memCount = 0;
@@ -36,6 +44,7 @@ public class Utility {
             int currSize = 1 + lr * 2;
             int[] sizeList = new int[currSize];
             sizeList[lr] = avgSize;
+            step = (int)Math.max(avgSize / (lr + k + 2), 1);
             for (int i = 1; i <= lr; ++i) {
                 sizeList[lr + i] = sizeList[lr + i - 1] + step;
                 sizeList[lr - i] = sizeList[lr - i + 1] - step;
@@ -70,11 +79,98 @@ public class Utility {
             lr += 1;
         }
         alSize.set(alSize.size() - 1, alSize.get(alSize.size() - 1) + n - memory);
-        int[] ans = new int[memCount];
+        int[] res = new int[memCount];
         int j = 0;
         for (int i = alSize.size() - 1; i >= 0; --i) {
             for (int p = 0; p < alCount.get(i); ++p) 
-                ans[j++] = alSize.get(i);
+                res[j++] = alSize.get(i);
+        }
+        int[] ans = new int[k];
+        if (memCount < k) {
+            // int fission = k / memCount + ((k % memCount == 0) ? 0 : 1);
+            // int more = k - memCount;
+            // int resI = memCount - 1, ansI = k - 1;
+            // while (more > 0) {
+            //     int cumuSize = 0;
+            //     int perSize = res[resI] / fission;
+            //     for (int i = 0; i < fission - 1; ++i) {
+            //         ans[ansI] = perSize;
+            //         ansI--;
+            //         cumuSize += perSize;
+            //     }
+            //     ans[ansI] = res[resI] - cumuSize;
+            //     ansI--;
+            //     resI--;
+            //     more -= (fission - 1);
+            // }
+            // while (ansI >= 0 && resI >= 0) {
+            //     ans[ansI] = res[resI];
+            //     ansI--;
+            //     resI--;
+            // }
+            
+            int fission = k / memCount + ((k % memCount == 0) ? 0 : 1);
+            int more = k - memCount;
+            int resI = 0, ansI = 0;
+            while (more > 0) {
+                int cumuSize = 0;
+                int perSize = res[resI] / fission;
+                for (int i = 0; i < fission - 1; ++i) {
+                    ans[ansI] = perSize;
+                    ansI++;
+                    cumuSize += perSize;
+                }
+                ans[ansI] = res[resI] - cumuSize;
+                ansI++;
+                resI++;
+                more -= (fission - 1);
+            }
+            while (ansI < k && resI < memCount) {
+                ans[ansI] = res[resI];
+                ansI++;
+                resI++;
+            }
+        } else if (memCount > k) {
+            // int fission = memCount / k + ((memCount % k == 0) ? 0 : 1);
+            // int less = memCount - k;
+            // int resI = 0, ansI = 0;
+            // while (less > 0) {
+            //     ans[ansI] = res[resI];
+            //     resI++;
+            //     for (int i = 0; i < fission - 1; ++i) {
+            //         ans[ansI] += res[resI];
+            //         resI++;
+            //     }
+            //     less -= (fission - 1);
+            //     ansI++;
+            // }
+            // while (ansI < k && resI < memCount) {
+            //     ans[ansI] = res[resI];
+            //     ansI++;
+            //     resI++;
+            // }
+
+            int fission = memCount / k + ((memCount % k == 0) ? 0 : 1);
+            int less = memCount - k;
+            int resI = memCount - 1, ansI = k - 1;
+            while (less > 0) {
+                ans[ansI] = res[resI];
+                resI--;
+                for (int i = 0; i < fission - 1; ++i) {
+                    ans[ansI] += res[resI];
+                    resI--;
+                }
+                less -= (fission - 1);
+                ansI--;
+            }
+            while (ansI < k && resI < memCount) {
+                ans[ansI] = res[resI];
+                ansI--;
+                resI--;
+            }
+        } else {
+            for (int i = 0; i < k; ++i)
+                ans[i] = res[i];
         }
         return ans;
     }

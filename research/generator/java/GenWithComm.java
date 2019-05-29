@@ -19,7 +19,7 @@ public class GenWithComm {
         double a = Math.exp(-1.0 / c);
         double b = a - Math.exp(-maxDegree * 1.0 / c);
         double y = rand.nextDouble();
-        return (int)(-c * Math.log(a - y * b));
+        return Math.max((int)(-c * Math.log(a - y * b)), 0);
     }
 
     public void genPWL(String[] args) {
@@ -40,6 +40,7 @@ public class GenWithComm {
         int nCom = Integer.parseInt(args[9]);
         double cLambda = Double.parseDouble(args[10]);
         double pC = Double.parseDouble(args[11]);
+        double rho = pC - 1.0;
         
         Map<String, Double> iTheta = new HashMap<String, Double>();
         iTheta.put("lambda", iLambda);
@@ -48,10 +49,23 @@ public class GenWithComm {
         
         // generation
         long actualEdges = 0;
+        long extraEdges = 0;
         Store store = new Store(filename, 1 << 21);
+
+        // record statistics 
+        // Store stats = new Store("stats.txt", 1 << 21);
+
         Set<Long> adj = new HashSet<Long>();
         int[][] split = Utility.splitCommunity((int)nNodes, (int)nNodes, nCom, cLambda);
         int anComms = split.length;
+
+        // record the comm size
+        // for (int i = 0; i < split.length; ++i) {
+        //     for (int j = 0; j < split[0].length; ++j) 
+        //         stats.write(split[i][j]);
+        //     stats.newLine();
+        // }
+
         // build Distributions
         Map<Integer, PowerLaw> rowDistr = new HashMap<Integer, PowerLaw>();
         Map<Integer, PowerLaw> colDistr = new HashMap<Integer, PowerLaw>();
@@ -82,8 +96,15 @@ public class GenWithComm {
             }
             PowerLaw oPL = rowDistr.get(split[spRowI][0]);
             long mainOutDegree = oPL.genOutDegree(cumuRow - 1);
-            int extraOutDegree = extraDegree(odMax, pC);
-            int eachExtraOut = (int)Math.ceil(extraOutDegree * 1.0 / anComms);
+            int extraOutDegree = 0;
+            if (rand.nextDouble() < rho)
+                extraOutDegree = extraDegree(odMax - mainOutDegree + 20, pC);
+
+            // statistics info 
+            // stats.write(extraOutDegree);
+            // stats.newLine();
+
+            // int eachExtraOut = (int)Math.ceil(extraOutDegree * 1.0 / anComms);
             cumuCol = 0;
             spColJ = 0;
             while (spColJ < anComms) {
@@ -92,26 +113,57 @@ public class GenWithComm {
                     num = (int)mainOutDegree;
                 } else {
                     if (rand.nextDouble() > 0.6) {
-                        num = eachExtraOut;
+                        // num = eachExtraOut;
+                        num = (int)Math.ceil(extraOutDegree * split[spColJ][1] / (nNodes - split[spRowI][1]));
                     } else {
                         num = 0;
                     }
                 }
-                PowerLaw iPL = colDistr.get(split[spColJ][1]);
-                while (adj.size() < num) {
-                    long t = iPL.genTargetID();
-                    adj.add(t + cumuCol);
+                
+                // power-law
+                // PowerLaw iPL = colDistr.get(split[spColJ][1]);
+                // while (adj.size() < num) {
+                //     long t = iPL.genTargetID();
+                //     adj.add(t + cumuCol);
+                // }
+                // uniform 
+                if (spColJ == spRowI) {
+                    PowerLaw iPL = colDistr.get(split[spColJ][1]);
+                    while (adj.size() < num) {
+                        long t = iPL.genTargetID();
+                        adj.add(t + cumuCol);
+                    }
+                } else {
+                    int size = split[spColJ][1];
+                    while (adj.size() < num) {
+                        long t = (long)rand.nextInt(size);
+                        adj.add(t + cumuCol);
+                    }
                 }
+
                 actualEdges += adj.size();
+                if (spColJ != spRowI) {
+                    extraEdges += adj.size();
+                }
                 store.writeln(i, adj);
+
+                // record statistics
+                // if (spColJ != spRowI) 
+                //     stats.writeln(i, adj);
+
                 adj.clear();
                 cumuCol += split[spColJ][1];
                 spColJ++;
             }
         }
         store.close();
+
+        // record statistics
+        // stats.close();
+
         // end
         System.out.println("actual number of edges = " + String.valueOf(actualEdges));
+        System.out.println("extra number of edges = " + String.valueOf(extraEdges));
         System.out.println("expected number of edges = " + String.valueOf(nEdges));
     }
 
