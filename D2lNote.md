@@ -98,3 +98,35 @@
 
 ## 多层感知机 (MLP)
 
+> 层数的计算，输入层不计入，因为输入层不涉及计算。
+
+1. 以两层感知机为例，模型如下：
+
+   约定：小批量样本 $X\in \mathbb{R}^{n \times d}$ ($n$为样本数量，$d$为特征数), 隐藏层单元数为 $h$ , 隐藏层输出为 $H$ , 隐藏层参数为 $W_h \in \mathbb{R}^{d \times h}$ , $b_h \in \mathbb{R}^{1 \times h}$ , 输出层单元数为 $q$ , 输出层参数为  $W_o \in \mathbb{R}^{h \times q}$ , $b_o \in \mathbb{R}^{1 \times q}$ , 输出为 $O \in \mathbb{R}^{n \times q}$ .
+
+   于是： $H=XW_h+b_h$ , $O=HW_o+b_o$   $\Rightarrow$ $O=(XW_h+b_h)W_o+b_o=XW_hW_o+b_hW_o+b_o$  
+
+   实际上，这依然是一个单层神经网络，因为只对数据进行了仿射变换（affine transformation）。
+
+2. 为解决上述问题，加入激活函数。
+
+   - **ReLU** (rectified linear unit) : $ReLU(x)=\max(x,0)$  
+   - **sigmoid** : $sigmoid(x)=\frac{1}{1+\exp(-x)}$  
+   - **tanh** : $\tanh(x)=\frac{1-\exp(-2x)}{1+\exp(2x)}$ 
+   - etc.
+
+3. 多层感知机就是至少包含一个隐藏层的由全连接层组成的网络，每个隐藏层的输出通过激活函数进行变换。**层数**和**每层中单元的个数**都是**超参数**。
+
+# 模型选择、欠拟合和过拟合
+
+- 误差
+
+1. 训练误差 (training error) 和泛化误差 (generalization error) 。前者是模型在训练集上的误差，后者是模型在测试数据样本上表现出的期望误差。
+2. 机器学习模型应该关注于降低泛化误差。
+
+- 模型选择
+
+1. 不同的模型；不同超参数下的模型
+2. 
+
+- 
