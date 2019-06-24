@@ -7,7 +7,7 @@ error_data = 0
 iterations = 0
 
 
-def gen_data(output):
+def gen_data_1052(output):
     L_min, L_max = 1, 10000000
     ST_min, ST_max = 1, 10
     M_min, M_max = 1, 100
@@ -22,6 +22,23 @@ def gen_data(output):
         fout.write(str(L) + '\n')
         fout.write(' '.join([str(S), str(T), str(M)]) + '\n')
         fout.write(' '.join([str(_) for _ in sorted(select_pos)]) + '\n')
+
+
+def gen_data_1156(output):
+    D_min, D_max = 2, 100
+    G_min, G_max = 1, 100
+    T_min, T_max = 0, 1000
+    F_min, F_max = 1, 30
+    H_min, H_max = 1, 25
+    with open(output, 'w') as fout:
+        D = random.randint(D_min, D_max)
+        G = random.randint(G_min, G_max)
+        fout.write('%d %d\n' % (D, G))
+        for _ in range(G):
+            T = random.randint(T_min, T_max)
+            F = random.randint(F_min, F_max)
+            H = random.randint(H_min, H_max)
+            fout.write('%d %d %d\n' % (T, F, H))
 
 
 def rename_data(output='data'):
