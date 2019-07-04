@@ -84,3 +84,13 @@ $E_{max}=\max \limits_{i < j < N} (nums[i]*nums[j]*\max(nums[i],nums[j]) + E_{ma
 
 $E_{max}(i \rightarrow j)=\max \limits_{k \in ((i+1)\%N \rightarrow (j-1+N)\%N)} (nums[i]*nums[k]*nums[j]+E_{max}(i \rightarrow k) + E_{max}(k \rightarrow j))$ 
 
+## P5018  对称二叉树
+
+> 找到一颗包含结点数最多的有权对称二叉树（结构对称，权值对称）。
+
+**思路0**：分别得到二叉树的前序遍历和后序遍历，如果一个结点为左孩子，则值为 $-1$ ，否则为 $1$ ，然后对于每个非叶子结点，比较其左孩子的前序遍历 和 右孩子的后序遍历，如果相匹配，则为对称结构，否则判断其孩子结点是否对称。
+
+**问题**：有一个WA，且复杂度高。
+
+**思路1**：最朴素的方法，递归判断。
+
