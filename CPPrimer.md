@@ -276,11 +276,40 @@
    // TODO：不过不加好像也没事？是否是仅为了可读性而加的typename
    ```
 
-7.  
+7. template SFINAE
+
+   SFINAE stands for: "Substitution Failure Is Not An Error". 
+
+   意思是当编译期匹配一个模板失败时，应该继续匹配，而不是停止。
+
+   场景：函数重载，在编译期进行函数匹配时，如果由多个普通函数或模板函数满足匹配条件，那么无法通过编译。而引入type-traits后，会有满足条件的模板函数缺少某一字段，引发错误，由于SFINAE机制，不会报错，转而与另外合法的重载函数进行匹配。经典示例：
+
+   ```c++
+   struct Test {
+       using type = int;
+   };
+   
+   template <typename T>
+   void func(typename T::type) {}	// definition 1, # 1
+   
+   template <typename T>
+   void func(T) {}	// definition 2, # 2
+   
+   func<Test>(10);	// call # 1
+   func<int>(10);	// 与#1进行匹配时，T::type显然是语法错误的(int::type)，但由于SFINAE原则，不会报错，转而与#2匹配
+   ```
+
+   
+
+8. type-traits
+
+   在编译期判断，如果条件不满足，则在编译期会出现错误。
 
 ### 参考
 
 [1]. https://www.internalpointers.com/post/understanding-meaning-lvalues-and-rvalues-c
 
 [2-5]. https://www.internalpointers.com/post/c-rvalue-references-and-move-semantics-beginners
+
+[7-8]. <https://shaharmike.com/cpp/sfinae/>
 
