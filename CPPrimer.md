@@ -304,6 +304,52 @@
 8. type-traits
 
    在编译期判断，如果条件不满足，则在编译期会出现错误。
+   
+9. `explicit` 关键字
+
+   > The `explicit` function specifier controls unwanted implicit type conversions. It can only be used in declarations of constructors within a class declaration.
+
+   **motivation**  考虑如下应用场景：
+
+   ```c++
+   class MyArray {
+   public:
+       MyArray(size_t count);
+   };
+   MyArray m_array = 123;	// OK, 隐式转换 (implicit conversion)，问题在于，这种隐式转换可能发生在其他地方，例如：
+   void print(const MyArray& array);	// #1
+   void print(int);	// #2
+   print(123);	// 问题：1.代码可读性; 2.这样做会引发意外的调用构造函数
+   // 如果希望打印"123"，print(123)，结果却调用print() #1 函数，调用MyArray的构造函数。所以需要将MyArray类的构造函数定义为显示构造函数以避免这种问题。
+   class MyString {
+   public:
+       String(int n);
+       String(const char* p);
+   };
+   MyString m_string = 'x';	// 3.调用时可能会出现意外情况，'x'转换为int，进而调用String(int n)构造函数。
+   ```
+
+   声明为`explicit`的构造函数，可以使用的调用方法如下：
+
+   ```c++
+   class A {
+   public:
+       explicit A();
+       explicit A(int);
+       explicit A(const char*, int = 0);
+   };
+   A a1;
+   A a2 = A(1);
+   A a3(1);
+   A a4 = A("Venditti");
+   A* ap = new A(1);
+   A a5 = (A)1;
+   A a6 = static_cast<A>(1);// static_cast Syntax: static_cast<new_type> (expression)
+   ```
+
+   
+
+10. 
 
 ### 参考
 
