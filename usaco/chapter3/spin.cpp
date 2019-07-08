@@ -2,6 +2,7 @@
 ID: wangbb21
 LANG: C++
 TASK: spin
+Solution: simplest, simulation on every angle
 */
 #include <iostream>
 #include <fstream>
