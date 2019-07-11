@@ -7,6 +7,7 @@ TASK: msquare
 #include <fstream>
 #include <queue>
 #include <string>
+#include <unordered_set>
 using namespace std;
 
 typedef unsigned int uint;
@@ -103,6 +104,8 @@ int main() {
 	status ans;
 	mq.push(fs);
 	bool ba, bb, bc;
+	unordered_set<uint> found;
+	found.insert(fn);
 	while (!mq.empty()) {
 		status st = mq.front();
 		mq.pop();
@@ -116,21 +119,30 @@ int main() {
 			tA(x);
 			status nxA = { x, st.s_t + "A" };
 			if (check(fout, fin, sp, nxA)) return 0;
-			else mq.push(nxA);
+			else if (found.find(x) == found.end()) { 
+				mq.push(nxA);
+				found.insert(x);
+			}
 		}
 		if (bb) {
 			uint x = st.ui_n;
 			tB(x);
 			status nxB = { x, st.s_t + "B" };
 			if (check(fout, fin, sp, nxB)) return 0;
-			else mq.push(nxB);
+			else if (found.find(x) == found.end()) {
+				mq.push(nxB);
+				found.insert(x);
+			}
 		}
 		if (bc) {
 			uint x = st.ui_n;
 			tC(x);
 			status nxC = { x, st.s_t + "C" };
 			if (check(fout, fin, sp, nxC)) return 0;
-			else mq.push(nxC);
+			else if (found.find(x) == found.end()) {
+				mq.push(nxC);
+				found.insert(x);
+			}
 		}
 	}
     fin.close();
