@@ -119,11 +119,11 @@
 
 3. 多层感知机就是至少包含一个隐藏层的由全连接层组成的网络，每个隐藏层的输出通过激活函数进行变换。**层数**和**每层中单元的个数**都是**超参数**。
 
-# 阅读caffe和mlpack源码，理解Forward和Backward Propagation
+### 阅读caffe和mlpack源码，理解Forward和Backward Propagation
 
 // TODO
 
-# 模型选择、欠拟合和过拟合
+## 模型选择、欠拟合和过拟合
 
 - 误差
 
@@ -145,5 +145,47 @@
 
   影响的两个重要因素：模型复杂度 和 训练数据集大小。
 
-- 
+### Deep Learning Book中相关内容
+
+衡量机器学习算法性能有两个因素：
+
+1. 降低训练误差 (Make the training error small.)
+2. 减少训练误差和泛化误差之间的差异 (Make the gap between training and test error small.)
+
+第一个因素对应欠拟合，第二个因素对应过拟合
+
+## 权重衰减
+
+> 应对过拟合问题：1. 增大训练数据集，但代价高昂；2. 使用复杂度合适的模型；3.权重衰减
+>
+> 权重衰减 $\Leftrightarrow$ $L2$ 范数正则化。
+
+以线性回归为例，没有权重衰减的损失函数为：
+
+$l(\mathbf{w},b)=\frac{1}{n} \sum \limits_{i=1}^{n} \frac{1}{2}(X^{(i)}\mathbf{w}+b-y^{(i)})^{2}$ 
+
+添加 $L2$ 范数正则化后的损失函数为：
+$l(\mathbf{w},b) + \frac{\lambda}{2n}||\mathbf{w}||^2$ 
+
+这样，权重 $\mathbf{w}$ 的迭代更新公式为：
+
+$\mathbf{w} \leftarrow \mathbf{w} - \frac{\eta}{n}\sum \limits_{i=1}^{n} (X^{(i)}\mathbf{w}+b-y^{(i)}) X^{(i)} - \frac{\eta \lambda}{n} \mathbf{w}$  $\iff$ 
+
+$\mathbf{w} \leftarrow (1-\frac{\eta \lambda}{n})\mathbf{w} - \frac{\eta}{n}\sum \limits_{i=1}^{n} (X^{(i)}\mathbf{w}+b-y^{(i)}) X^{(i)}$  
+
+从第1项可以看出，正则化令权重首先乘以小于1的数，再减去梯度。所以 $L2$ 范数正则化又称为权重衰减。
+
+## 丢弃法
+
+> 同样为了应对过拟合问题，本节特指倒置丢弃法 (inverted dropout)。通常，靠近输入层的丢弃概率小一些，远离输入层的隐藏层丢弃概率大一些。丢弃只在训练模型时使用。
+
+假设隐藏层的一个单元输出为 $h$ ，该单元有一定概率被丢弃，假设丢弃概率为 $p$ ，那么有 $p$ 的概率输出被清零，有 $1-p$ 的概率被除以 $1 - p$ 做拉伸，设丢弃的随机变量为 $\xi$ ，其取值为 $0$ 或 $1$ ，使用丢弃后的输出为：
+
+$h'=\frac{\xi}{1-p} h$ 
+
+因为 $E(\xi)=1-p$ ，所以 $E(h')=\frac{E(\xi)}{1-p} h = h$ ，即丢弃法并不改变输出的期望值。
+
+
+
+
 
