@@ -52,7 +52,7 @@ public class Streaming {
         File sourceFile = new File(filename);
         long actualEdges = 0, iterEdges = 0;
         double curRate = generationRate;
-        Store store = new Store(filename, 1 << 21);
+        Store store = new Store(filename, 1 << 20);
         Set<Long> adj = new HashSet<Long>();
         OutDegreeDistribution preOdd = null;
         do {
@@ -62,7 +62,7 @@ public class Streaming {
             int startNodeID = (int)nNodes - (int)involvedN;
             OutDegreeDistribution curOdd = new OutPowerLaw((int)odMin, (int)odMax, involvedN, involvedE, oTheta);
             DeltaOutDistribution dod = new DeltaOutDistribution(preOdd, curOdd);
-            // dod.setBucket(2);
+            dod.setBucket(2);
             for (int i = 0; i < involvedN; ++i) {
                 int outDegree = dod.getOutDegree(i);
                 while (adj.size() < outDegree) {
@@ -85,9 +85,9 @@ public class Streaming {
             copyFiles(sourceFile, destFile);
             fileNo++;
             // end copying
+            System.out.println("Iteration " + String.valueOf(curRate) + " : " + String.valueOf(iterEdges));
             curRate += generationRate;
             preOdd = curOdd;
-            System.out.println("Iteration " + String.valueOf(curRate) + " : " + String.valueOf(iterEdges));
         } while (curRate < 1.0);
         // end
         System.out.println("actual number of edges = " + String.valueOf(actualEdges));

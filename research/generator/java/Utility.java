@@ -79,11 +79,23 @@ public class Utility {
             lr += 1;
         }
         alSize.set(alSize.size() - 1, alSize.get(alSize.size() - 1) + n - memory);
-        int[] res = new int[memCount];
+	System.out.println("memCount = " + String.valueOf(memCount));
+	memCount = 0;
+	for (int i = 0; i < alCount.size(); ++i) 
+	    memCount += alCount.get(i);
+	System.out.println("memCount = " + String.valueOf(memCount));
+	// System.out.println(alSize.size());
+	// System.out.println(alCount.size());
+        int[] res = new int[memCount + 2];
         int j = 0;
         for (int i = alSize.size() - 1; i >= 0; --i) {
-            for (int p = 0; p < alCount.get(i); ++p) 
+            for (int p = 0; p < alCount.get(i); ++p) {
+	        try {
                 res[j++] = alSize.get(i);
+		} catch(Exception e) {
+		System.out.println(j);
+		}
+	    }
         }
         int[] ans = new int[k];
         if (memCount < k) {
@@ -163,7 +175,7 @@ public class Utility {
                 less -= (fission - 1);
                 ansI--;
             }
-            while (ansI < k && resI < memCount) {
+            while (ansI >= 0 && resI >= 0) {
                 ans[ansI] = res[resI];
                 ansI--;
                 resI--;

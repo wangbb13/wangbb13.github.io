@@ -145,7 +145,8 @@ public class Distribution {
     }
 
     public void mathEdges() {
-        System.out.println("======================Adjust====================");
+        // System.out.println("======================Adjust====================");
+        
         // adjust maxDegree so that the number of nodes 
         // whose degree is maxDegree is equal to or more than 1
         maxDegree = Math.min(maxDegree, numNodes);
@@ -167,7 +168,9 @@ public class Distribution {
         maxDegree = binL - 1;
         // end adjust maxDegree
         long actualEdges = currentEdges();
-        System.out.println("max degree = " + String.valueOf(maxDegree) + " actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
+        
+        // System.out.println("max degree = " + String.valueOf(maxDegree) + " actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
+        
         // match the expected number of edges
         if (actualEdges < numEdges) {
             long temp = maxDegree;
@@ -217,13 +220,14 @@ public class Distribution {
             maxDegree = binL - 1;
             actualEdges = currentEdges();
         }
-        System.out.println("adjusted maxDegree = " + String.valueOf(maxDegree));
-        System.out.println("actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
+        // System.out.println("adjusted maxDegree = " + String.valueOf(maxDegree));
+        // System.out.println("actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
+        
         // end match the expected number of edges
         // update degreeRange
         degreeRange = maxDegree - minDegree + 1;
         // end update
-        System.out.println("===================End====================");
+        // System.out.println("===================End====================");
     }
 
     public void buildForOdSimply() {
@@ -471,7 +475,7 @@ public class Distribution {
 
     public void printICdf() {
         for (int i = 0; i < idHashCDF.length; ++i) {
-            System.out.println(String.valueOf(idHashTID[i]) + " " + String.valueOf(idHashCDF[i]));
+            System.out.println(idHashCDF[i]);
         }
     }
 

@@ -2,6 +2,7 @@
  * create time : 2019-03-26 22:18
  * author : wangbb13
  */
+import java.util.Map;
 
 public class LogNormal extends Distribution {
     public LogNormal() {

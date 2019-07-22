@@ -9,9 +9,13 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.Set;
+import java.util.Map;
+import java.util.List;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Collections;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 class One extends Thread {
     private static int count = 0;
@@ -227,12 +231,9 @@ public class Test {
 
     void testPWL() {
         long minD = 1;
-        // long maxD = 50;
-        long maxD = 10;
-        // long n = 1000;
-        // long m = 18000;
-        long n = 100;
-        long m = 330;
+        long maxD = 50;
+        long n = 1000;
+        long m = 18000;
         Map<String, Double> theta = new HashMap<String, Double>();
         theta.put("lambda", 1.12);
         PowerLaw pwl = new PowerLaw(minD, maxD, n, m, theta);
@@ -244,10 +245,8 @@ public class Test {
         // int[] split = pwl.splitSourceNodes(10);
         // printArray(oDNum);
         // printArray(split);
-        // pwl.preProcess(true);   // out-degree
-        // pwl.printOCdf();
-        pwl.preProcess(false);   // in-degree
-        pwl.printICdf();
+        pwl.preProcess(true);   // out-degree
+        pwl.printOCdf();
     }
 
     public void testClass() {
@@ -326,15 +325,42 @@ public class Test {
         System.out.println(" ms.");
     }
 
-    public void testSort() {
-        ArrayList<Integer> list = new ArrayList<Integer>();
-        list.add(3);
-        list.add(2);
-        list.add(9);
-        Collections.sort(list);
-        for (int e : list) {
-            System.out.println(e);
+    public void testJson(String filename) {
+        LoadJson lj = new LoadJson(filename);
+        JSONObject jsonObj = lj.load();
+        List<Object> vss = (ArrayList<Object>)jsonObj.get("vss");
+        Map<String, Integer> vLabelIndexMap = new HashMap<String, Integer>();
+        for (int i  =0; i < vss.size(); ++i) {
+            String vLabel = (String)(((Map)vss.get(i)).get("label"));
+            String amount = (Long)(((Map)vss.get(i)).get("amount")) + "";
+            System.out.printf("vertex label: %s (%s)\n", vLabel, amount);
         }
+    }
+
+    public void testUniform() {
+        Uniform uf = new Uniform(8, 12, 10, 100, null);
+        for (int i = 0; i < 100; ++i) {
+            System.out.printf("%d ", uf.genTargetID());
+        }
+        System.out.println();
+    }
+
+    public void testSimple() {
+        String filename = "./jsons/simple.json";
+        Generation gen = new Generation(filename);
+        gen.run();
+    }
+
+    public void testCommunity() {
+        String filename = "./jsons/community.json";
+        Generation gen = new Generation(filename);
+        gen.run();
+    }
+
+    public void testSocial() {
+        String filename = "./jsons/social.json";
+        Generation gen = new Generation(filename);
+        gen.run();
     }
 
     public static void main(String[] args) {
@@ -348,20 +374,22 @@ public class Test {
         // t.testMT();
         // t.testRV();
         // t.testIOPerformance();
-        t.testPWL();
+        // t.testPWL();
         // t.testClass();
         // t.testDelta();
         // t.testString();
         // t.testBitOp();
         // t.testBufferWR();
+        // t.testJson("./jsons/simple.json");
+        // t.testSimple();
+        // t.testCommunity();
+        t.testSocial();
 
-        // int n = 1 << 20;
-        // int bf = 1 << 20;
-        // for (int i = 0; i < 6; ++i) {
-        //     t.testStore(n, bf);
-        //     bf <<= 1;
-        // }
-
-        // t.testSort();
+	    // int n = 1 << 20;
+	    // int bf = 1 << 20;
+	    // for (int i = 0; i < 6; ++i) {
+	    //     t.testStore(n, bf);
+	    //     bf <<= 1;
+	    // }
     }
 }
