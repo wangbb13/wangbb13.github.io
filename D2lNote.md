@@ -1,5 +1,7 @@
 # D2L (Dive into Deep Learning) 学习笔记
 
+# 深度学习基础
+
 ## 线性回归 (Linear Regression)
 
 > 输出是连续值，解决回归 (regression) 问题。softmax 回归可以解决分类问题（输出是离散值）。
@@ -185,7 +187,112 @@ $h'=\frac{\xi}{1-p} h$
 
 因为 $E(\xi)=1-p$ ，所以 $E(h')=\frac{E(\xi)}{1-p} h = h$ ，即丢弃法并不改变输出的期望值。
 
+# 深度学习计算
 
+## 模型构造
+
+`nn.Sequential`继承自`nn.Block`类，我们可以实现`nn.Block`的一个子类来灵活地构造模型。
+
+## 模型参数
+
+> 访问、初始化和共享。
+
+### 初始化模型参数
+
+- `mxnet` 默认初始化方法
+
+  权重参数为 $[-0.07, 0.07]$ 之间符合均匀分布的随机数，偏差参数则全为 $0$ .
+
+- `mxnet.init` 中预设的一些初始化方法
+
+  正太分布： `init.Normal(mu=a, sigma=b)` 
+
+  常数： `init.Constant(x)` 
+
+  为特定参数进行初始化： `net[0].weight.initialize(init=init.Xavier())` 
+
+- 自定义初始化方法
+
+  实现一个 `init.Initializer` 子类，例如：
+
+  ```python
+  class MyInit(init.Initializer):
+  	def _init_weight(self, name, data):
+          print('Init', name, data.shape)
+          data[:] = nd.random.uniform(low=-10, high=10, shape=data.shape)
+          data *= data.abs() >= 5
+  
+  net.initialize(MyInit(), force_reinit=True)
+  # a possible output
+  # Init dense0_weight (256, 20)
+  ```
+
+  
+
+- 通过 `Parameter.set_data` 方法直接初始化模型参数
+
+  例如：`net[0].weight.set_data(net[0].weight.data() + 1)` 
+
+### 共享模型参数
+
+例如：
+
+```python
+net = nn.Sequential()
+shared = nn.Dense(8, activation='relu')
+net.add(nn.Dense(8, activation='relu'),
+       shared,
+       nn.Dense(8, activation='relu', params=shared.params),
+       nn.Dense(10))
+net.initialize()
+
+X = nd.random.uniform(shape=(2, 20))
+net(X)
+net[1].weight.data()[0] == net[2].weight.data()[0]
+```
+
+### 延后初始化
+
+> `mxnet` 中模型调用 `initialize()` 方法时，实际并没有初始化参数。输入数据维度没有确认，因此参数的形状也无法确定，只有输入数据，进行第一次前向计算时，模型参数才会被真正初始化。
+
+如何避免延后初始化：
+
+第一种情况：对已初始化的模型进行重新初始化。此时，参数形状不会发生变化，系统会立即进行参数的重新初始化。例如：
+
+```python
+net.initialize(init=MyInit(), force_reinit=True)
+```
+
+第二种情况：创建模型时指定输入个数 ( `in_units` )，从而不需要通过输入来推断参数的形状。例如：
+
+```python
+net = nn.Sequential()
+net.add(nn.Dense(256, in_units=20, activation='relu'))
+net.add(nn.Dense(10, in_units=256))
+```
+
+## 模型的存储和读取
+
+> `mxnet.gluon.nn.Block` 类提供的方法 `save_parameters` 和 `load_parameters`  方法用于模型参数的存储和读取。用法如下：
+
+```python
+from mxnet import nd
+from mxnet.gluon import nn
+net = nn.Sequential()
+net.add(nn.Dense(256, activation='relu'), nn.Dense(10))
+net.initialize()
+X = nd.random.uniform(shape=(2, 20))
+Y = net(X)
+
+# save parameters
+filename = 'net.params'
+net.save_parameters(filename)
+
+# load parameters
+# build a net net1
+net1.load_parameters(filename)
+Y1 = net1(X)
+```
 
 
 
