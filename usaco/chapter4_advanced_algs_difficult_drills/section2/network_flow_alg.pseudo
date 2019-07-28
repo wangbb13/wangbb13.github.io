@@ -1,0 +1,58 @@
+// 1. maximum network flow in a directed graph
+// 2. maximum matching in a bipartite graph 
+// 3. minimum cut in an undirected graph 
+
+// the pseudo code of network flow algorithm 
+if (source == sink) 
+	totalflow = Infinity
+	DONE
+
+totalflow = 0
+
+while (true) 
+	// find path with highest capacity from 
+	// source to sink
+	// uses a modified dijkstra's algorithm
+	for all nodes i
+		prevnode(i) = nil
+		flow(i) = 0
+		visited(i) = false
+	flow(source) = Infinity 
+
+	while (true) 
+		maxflow = 0
+		maxloc = nil
+		// find the unvisited node with
+		// the highest capacity to it
+		for all nodes i
+			if (flow(i) > maxflow AND not visited(i))
+				maxflow = flow(i)
+				maxloc = i
+		if (maxloc == nil) 
+			break inner while loop
+		if (maxloc == sink)
+			break inner while loop
+		visited(maxloc) = true
+		// update its neighbors
+		for all neighbors i of maxloc
+			if (flow(i) < min(maxflow, capacity(maxloc, i))) 
+				prevnode(i) = maxloc
+				flow(i) = min(maxflow, capacity(maxloc, i)) 
+
+	if (maxloc == nil)	// no path
+		break outer while loop 
+
+	pathcapacity = flow(sink)
+	totalflow = totalflow + pathcapacity 
+
+	// add that flow to the network, 
+	// update capacity appropriately 
+	curnode = sink 
+	// for each arc, prevnode(curnode), 
+	// curnode on path: 
+	while (curnode != source) 
+		nextnode = prevnode(curnode) 
+		capacity(nextnode, curnode) -= pathcapacity 
+		capacity(curnode, nextnode) += pathcapacity 
+		curnode = nextnode
+
