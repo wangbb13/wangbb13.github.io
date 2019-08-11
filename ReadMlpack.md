@@ -59,3 +59,13 @@
 
 **`midpoint_split.hpp`**
 
+## method
+
+> 学习机器学习方法。
+
+### AdaBoost
+
+
+
+
+

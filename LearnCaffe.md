@@ -4,7 +4,7 @@
 
 > 函数： $f = |x|$ 
 >
-
-> Forward:  $y = |x|$
-
+> Forward:  $y = |x|$ 
+>
 > Backward: 
+

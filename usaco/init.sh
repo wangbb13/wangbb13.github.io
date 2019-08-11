@@ -17,7 +17,7 @@ echo create $fn files done.
 
 echo "/*" >> $fn
 echo "ID: wangbb21" >> $fn 
-echo "LANG: C++" >> $fn
+echo "LANG: C++11" >> $fn
 echo "TASK: $name" >> $fn
 echo "*/" >> $fn
 echo "#include <iostream>" >> $fn

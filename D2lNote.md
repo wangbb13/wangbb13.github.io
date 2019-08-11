@@ -1,6 +1,6 @@
 # D2L (Dive into Deep Learning) 学习笔记
 
-# 深度学习基础
+# Chapter1  深度学习基础
 
 ## 线性回归 (Linear Regression)
 
@@ -187,7 +187,7 @@ $h'=\frac{\xi}{1-p} h$
 
 因为 $E(\xi)=1-p$ ，所以 $E(h')=\frac{E(\xi)}{1-p} h = h$ ，即丢弃法并不改变输出的期望值。
 
-# 深度学习计算
+# Chapter2  深度学习计算
 
 ## 模型构造
 
@@ -293,6 +293,8 @@ net.save_parameters(filename)
 net1.load_parameters(filename)
 Y1 = net1(X)
 ```
+
+# Chapter3  优化算法
 
 
 
