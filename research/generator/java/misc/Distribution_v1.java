@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
-import java.math.BigDecimal;
+// import java.math.BigDecimal;
+// import java.util.ArrayList;
 
 public class Distribution {
     private long minDegree;
@@ -23,7 +24,7 @@ public class Distribution {
     private long odSimpleMemNo;     // memory
     private int odSimpleMemId;     // memory
     private long odSimpleMemoff;    // memory
-    private long [] odSimpleCNum;   // number of nodes whose degree is i + minDegree
+    private long [] odSimpleCNum;   // cumulative number of nodes whose degree less than some degree
     // arrays and variables for getting out-degree intricately
     private long [] odComplexDegree;    // get a degree directly
     private double oMinGap;
@@ -60,14 +61,6 @@ public class Distribution {
         numEdges = m;
         degreeRange = maxDegree - minDegree + 1;
         theta = new HashMap<String, Double>();
-        // For PowerLaw
-        if (params.containsKey("lambda")) {
-            double l = -Math.abs(params.get("lambda"));
-            params.put("lambda", l);
-            // System.out.print("Constructor: ");
-            // System.out.println(params.get("lambda"));
-        }
-        // End
         for (Map.Entry<String, Double> entry : params.entrySet()) {
             theta.put(entry.getKey(), entry.getValue());
         }
@@ -121,35 +114,27 @@ public class Distribution {
     public long numberOfMaxDegree() {
         double maxPDF = pdf(maxDegree);
         double sumPDF = maxPDF;
-        for (long i = minDegree; i < maxDegree; ++i) {
+        for (long i = minDegree + 1; i <= maxDegree; ++i) {
             sumPDF += pdf(i);
         }
         return Math.round(numNodes * (maxPDF / sumPDF));
     }
 
     public long currentEdges() {
-        degreeRange = maxDegree - minDegree + 1;
         double sum = 0.0;
-        double[] p = new double[(int)degreeRange];
-        for (int i = (int)minDegree; i <= maxDegree; ++i) {
-            p[i - (int)minDegree] = pdf(i);
-            sum += p[i - (int)minDegree];
+        double zip = 0.0;
+        for (long i = minDegree; i <= maxDegree; ++i) {
+            double p = pdf(i);
+            sum += p;
+            zip += i * p;
         }
         double alpha = numNodes / sum;
-        long ans = 0;
-        for (int i = 0; i < degreeRange; ++i) {
-            ans += Math.round(alpha * p[i] * (i + minDegree));
-        }
-        // System.out.println("Edges = " + String.valueOf(ans));
-        return ans;
+        return Math.round(alpha * zip);
     }
 
     public void mathEdges() {
-        // System.out.println("======================Adjust====================");
-        
         // adjust maxDegree so that the number of nodes 
         // whose degree is maxDegree is equal to or more than 1
-        maxDegree = Math.min(maxDegree, numNodes);
         long binL = maxDegree + 1;
         long binR = maxDegree;
         while (binR > 0 && numberOfMaxDegree() < 1) {
@@ -168,9 +153,7 @@ public class Distribution {
         maxDegree = binL - 1;
         // end adjust maxDegree
         long actualEdges = currentEdges();
-        
-        // System.out.println("max degree = " + String.valueOf(maxDegree) + " actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
-        
+        System.out.println("actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
         // match the expected number of edges
         if (actualEdges < numEdges) {
             long temp = maxDegree;
@@ -182,16 +165,14 @@ public class Distribution {
             }
             binR = Math.min(binR, numNodes);
             while (binL < binR) {
-                // System.out.println("If : " + String.valueOf(binL) + " " + String.valueOf(binR));
                 maxDegree = (binL + binR) / 2;
-                if (numberOfMaxDegree() < 1)
+                if (numberOfMaxDegree() > 0)
                     binR = maxDegree;
                 else
                     binL = maxDegree + 1;
             }
             maxDegree = binL - 1;
             actualEdges = currentEdges();
-            // System.out.println("If : " + String.valueOf(maxDegree) + " , " + String.valueOf(actualEdges));
             if (actualEdges > numEdges) {
                 binL = temp;
                 binR = maxDegree;
@@ -220,14 +201,12 @@ public class Distribution {
             maxDegree = binL - 1;
             actualEdges = currentEdges();
         }
-        // System.out.println("adjusted maxDegree = " + String.valueOf(maxDegree));
-        // System.out.println("actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
-        
+        System.out.println("adjusted maxDegree = " + String.valueOf(maxDegree));
+        System.out.println("actual edges = " + String.valueOf(actualEdges) + " expected edges = " + String.valueOf(numEdges));
         // end match the expected number of edges
         // update degreeRange
         degreeRange = maxDegree - minDegree + 1;
         // end update
-        // System.out.println("===================End====================");
     }
 
     public void buildForOdSimply() {
@@ -300,22 +279,10 @@ public class Distribution {
         for (int i = iminDegree; i <= imaxDegree; ++i) {
             cum += pdf(i);
             temp[i - iminDegree] = cum;
-            // if (i - iminDegree == 37) {
-            //     System.out.println(temp[i - iminDegree]);
-            // }
         }
         double alpha = numNodes / cum;
-        // System.out.println("numNodes = " + String.valueOf(numNodes));
-        // System.out.println("cum = " + String.valueOf(cum));
         for (int i = 0; i < degreeRange; ++i) {
-            // if (i == 37) {
-            //     System.out.println(temp[i]);
-            // }
             temp[i] *= alpha;
-            // if (i == 37) {
-            //     System.out.println(temp[i]);
-            //     System.out.println(alpha);
-            // }
         }
         // end temp
         // build CDF and maximum ID first
@@ -324,14 +291,9 @@ public class Distribution {
         iCdf[0] = 0.0;
         iIndex[0] = -1;
         for (int i = 1; i <= degreeRange; ++i) {
-            long num = (long)Math.round(temp[i - 1]);
-            // iIndex[i] = iIndex[i - 1] + num;
-            // iCdf[i] = iCdf[i - 1] + num * (i - 1 + minDegree);
-            iIndex[i] = num;
-            iCdf[i] = num * (i - 1 + minDegree);
-            // if (i == 38) {
-            //     System.out.println(num);
-            // }
+            long num = (long)Math.ceil(temp[i - 1]);
+            iIndex[i] = iIndex[i - 1] + num;
+            iCdf[i] = iCdf[i - 1] + num * (i - 1 + minDegree);
         }
         // System.out.println("iCdf[1] = " + String.valueOf(temp[0]));
         // iCdf[0] = minDegree / iCdf[size];
@@ -341,26 +303,16 @@ public class Distribution {
         iIndex[size] = numNodes - 1;
         // end build CDF and ID list
         iMinGap = 1.0;
-        // int memI = -1;
         for (int i = 1; i <= degreeRange; ++i) {
             iCdf[i] /= iCdf[size];
-            // if (iCdf[i] - iCdf[i - 1] < iMinGap) {
-            //     iMinGap = iCdf[i] - iCdf[i - 1];
-            //     memI = i;
-            // }
             iMinGap = Math.min(iMinGap, iCdf[i] - iCdf[i - 1]);
         }
         // build hash tables
         // for (int i = 0; i <= degreeRange; ++i) {
         //     System.out.print(String.valueOf(iCdf[i]) + " ");
         // }
-        // System.out.println(memI);
-        // System.out.println(iCdf[memI]);
-        // System.out.println(iCdf[memI - 1]);
         // System.out.println("iMinGap = " + String.valueOf(iMinGap));
-        // iMinGap = Math.max(iMinGap, 4.761904761904762e-10);
         int length = (int)Math.ceil(1.0 / iMinGap) + 1;
-        // System.out.println("length = " + String.valueOf(length));
         idHashTID = new long[length];
         idHashCDF = new double[length];
         idHashRatio = new double[length];
@@ -463,66 +415,5 @@ public class Distribution {
             r = idHashRatio[index - 1];
         }
         return a + Math.round((rv - c) * r);
-    }
-
-    public double getOMinGap() {
-        return oMinGap;
-    }
-
-    public double getIMinGap() {
-        return iMinGap;
-    }
-
-    public void printICdf() {
-        for (int i = 0; i < idHashCDF.length; ++i) {
-            System.out.println(idHashCDF[i]);
-        }
-    }
-
-    public void printOCdf() {
-        int size = odSimpleCNum.length;
-        double[] cdf = new double[size];
-        cdf[0] = odSimpleCNum[0];
-        for (int i = 1; i < size; ++i) {
-            cdf[i] = cdf[i - 1] + odSimpleCNum[i];
-        }
-        for (int i = 0; i < size; ++i) {
-            cdf[i] /= cdf[size - 1];
-        }
-        double ans = 1.0;
-        for (int i = 0; i < size; ++i) {
-            System.out.println(cdf[i]);
-            if (i > 0) {
-                ans = Math.min(ans, cdf[i] - cdf[i - 1]);
-            }
-        }
-        System.out.println("min out gap = " + String.valueOf(ans));
-    }
-
-    public int[] splitSourceNodes(int nThreads) {
-        int[] ans = new int[nThreads + 1];
-        ans[0] = 0;
-        long step = (long)(numEdges / nThreads);
-        long vc = step;
-        int j = 0;
-        int d = (int)minDegree;
-        long sum = 0;
-        int acc = 0;
-        for (int i = 1; i < nThreads; ++i) {
-            while (j < odSimpleCNum.length && sum < vc) {
-                sum += d * odSimpleCNum[j];
-                acc += (int)odSimpleCNum[j];
-                d++;
-                j++;
-            }
-            vc += step;
-            ans[i] = acc;
-        }
-        ans[nThreads] = (int)numNodes;
-        return ans;
-    }
-
-    public long[] getOdNum() {
-        return odSimpleCNum;
     }
 }

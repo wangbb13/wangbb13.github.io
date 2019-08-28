@@ -1,0 +1,49 @@
+{
+  "graph": "forum",
+  "node": [
+    {
+      "label": "user",
+      "amount": 10000
+    },
+    {
+      "label": "topic",
+      "amount": 30
+    },
+    {
+      "label": "post",
+      "amount": 200000
+    }
+  ],
+  "edge": [
+    {
+      "label": "follow",
+      "source": "user",
+      "target": "user",
+      "amount": 100000,
+      "in": {"type": "power_law", "lambda": 1.15, "min-d": 1, "max-d": 50},
+      "out": {"type": "power_law", "lambda": 1.15, "min-d": 1, "max-d": 60},
+      "community": {
+        "amount": 30,
+        "rho": 0.6,
+        "lambda": 1.05
+      }
+    },
+    {
+      "label": "focus-on",
+      "source": "user",
+      "target": "topic",
+      "amount": 30000,
+      "in": {"type": "power_law", "lambda": 1.5, "min-d": 1, "max-d": 400},
+      "out": {"type": "uniform", "min-d": 1, "max-d": 10}
+    },
+    {
+      "label": "publish",
+      "source": "user",
+      "target": "post",
+      "amount": 200000,
+      "in": {"type": "uniform", "min-d": 1, "max-d": 1},
+      "out": {"type": "power_law", "lambda": 1.15, "min-d": 1, "max-d": 100}
+    }
+  ],
+  "store-format": "ADJ"
+}

@@ -1,0 +1,21 @@
+{
+    "graph": "streaming",
+    "vss": [
+      {
+        "label": "user",
+        "amount": 1000
+      }
+    ],
+    "ess": [
+      {
+        "label": "follow",
+        "source": "user",
+        "target": "user",
+        "edges": 4000,
+        "in": {"type": "power_law", "lambda": 2.5, "min-d": 1, "max-d": 80},
+        "out": {"type": "power_law", "lambda": 2.5, "min-d": 1, "max-d": 70},
+        "gr": 0.1
+      }
+    ],
+    "store-format": "ADJ"
+}

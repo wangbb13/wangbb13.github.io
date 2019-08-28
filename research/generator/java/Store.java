@@ -59,7 +59,23 @@ public class Store {
 
     public void writeln(long i, Set<Long> adj) {
         // writelnWithPW(i, adj);
+	// System.out.println("Write row " + String.valueOf(i) + " ..." + String.valueOf(adj.size()));
         writelnWithBW(i, adj);
+    }
+
+    public void write(long i) {
+    	try {
+	    bw.write(Long.toString(i));
+	    bw.write(" ");
+	} catch (IOException ioe) {
+	}
+    }
+
+    public void newLine() {
+        try {
+	    bw.newLine();
+	} catch (IOException ioe) {
+	}
     }
 
     public void flush() {
@@ -73,11 +89,12 @@ public class Store {
 
     public void close() {
         try {
+	    flush();
             pw.close();
-            fw.close();
-            bw.close();
+	    fw.close();
+	    bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 }

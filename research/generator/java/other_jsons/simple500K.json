@@ -1,0 +1,20 @@
+{
+  "graph": "simple500K",
+  "vss": [
+    {
+      "label": "user",
+      "amount": 500000
+    }
+  ],
+  "ess": [
+    {
+      "label": "follow",
+      "source": "user",
+      "target": "user",
+      "edges": 2000000,
+      "in": {"type": "power_law", "lambda": 1.75, "min-d": 1, "max-d": 80},
+      "out": {"type": "power_law", "lambda": 1.75, "min-d": 1, "max-d": 70}
+    }
+  ],
+  "store-format": "ADJ"
+}

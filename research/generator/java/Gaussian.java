@@ -2,6 +2,7 @@
  * create time : 2019-03-26 20:50
  * author : wangbb13
  */
+import java.util.Map;
 
 public class Gaussian extends Distribution {
     public Gaussian() {
