@@ -349,7 +349,39 @@
 
    
 
-10. 
+10.  单例
+
+   简洁且线程安全（thread-safe）的写法：
+
+   ```c++
+   class Singleton {
+   public：
+       static Singleton& get_instance() {
+     		static Singleton instance;
+       	return instance;
+   	}
+       
+       Singleton (Singleton const&) = delete;		// 删除拷贝构造函数
+       void operator=(Singleton const&) = delete;	// 删除拷贝赋值运算符
+       
+   private:
+       Singleton() {
+           // do something ... 
+       }
+   };
+   ```
+
+   
+
+11. `OpenMP`中schedule选择`dynamic`和`static`的区别
+
+   Schedule选项控制在线程间如何划分循环任务。
+
+   `static`: 依次将循环任务分配给每个线程，当循环数和线程数一定时，各线程分配的任务是确定的。
+
+   `dynamic`: 动态分配任务，先到先服务。
+
+12. 
 
 ### 参考
 
@@ -357,5 +389,9 @@
 
 [2-5]. https://www.internalpointers.com/post/c-rvalue-references-and-move-semantics-beginners
 
-[7-8]. <https://shaharmike.com/cpp/sfinae/>
+[7-8]. <https://shaharmike.com/cpp/sfinae/> 
+
+[11]. <https://stackoverflow.com/questions/10850155/whats-the-difference-between-static-and-dynamic-schedule-in-openmp> 
+
+
 
