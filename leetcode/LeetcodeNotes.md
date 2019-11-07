@@ -9,3 +9,33 @@
 
 >   定位：不是个有价值的题。
 
+## Problem 0044
+
+>   通配符匹配，输入：字符串；正则表达式，只有 '?', '*' 和所有小写字母。
+
+0.  思路，二维DP，缺点：空间复杂度过高，如果是非常长的字符串，比如文本，这样的做法是不合适的。
+
+1.  最快的解法，代码如下：
+
+    ```c++
+    bool isMatch(string s, string p) {
+        int is = 0, ip = 0, start = -1, match;
+        while (is < s.size()) {
+            if (s[is] == p[ip] || p[ip] == '?') {
+                is++;
+                ip++;
+            } else if (p[ip] == '*') {
+                start = is;
+                match = ++ip;
+            } else if (start != -1) {
+                is = ++start;
+                ip = match;
+            } else return false;
+        }
+        while (ip < p.size() && p[ip] == '*') ip++;
+        return (ip == p.size());
+    }
+    ```
+
+    思路：匹配 `s[si]` 最长的 `p` 的前缀。
+
